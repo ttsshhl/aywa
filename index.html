@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Айва — маркетплейс готовых проектов</title>
+<meta name="description" content="Айва — маркетплейс готовых проектов: приложения, игры, боты и сервисы с выручкой. Безопасная сделка, комиссия 10%.">
+<meta name="theme-color" content="#FAFAF8">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Айва — маркетплейс готовых проектов">
+<meta property="og:description" content="Приложения, игры, боты и сервисы с живой аудиторией и выручкой. Сделка под защитой площадки.">
+<meta property="og:locale" content="ru_RU">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAFAF8; --card:#FFFFFF; --tint:#F0F0EC; --tint2:#F5F5F2;
+  --ink:#121412; --muted:#5E635E; --faint:#767B76; --line:#E4E4DE; --line2:#CDCDC5;
+  --quince:#177346; --quince-dk:#0F5733; --quince-soft:#E6F1EA;
+  --gold:#8F6A12; --bad:#A03A28; --bad-soft:#F7EAE6;
+  --ui:'Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --disp:'Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --w:1080px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 28px}
+.wide{max-width:1300px}
+:focus-visible{outline:2px solid var(--quince);outline-offset:2px;border-radius:3px}
+.lbl{font-family:var(--mono);font-size:10.5px;line-height:1.4;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:500}
+
+/* ── шапка ─────────────────────────────────────────────── */
+header{border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:30}
+.head{display:flex;align-items:center;justify-content:space-between;height:60px;gap:24px}
+.brand{display:flex;align-items:center;gap:9px;background:none;border:0;padding:0}
+.brand b{font-size:20px;font-weight:700;letter-spacing:-0.03em}
+.head nav{display:flex;align-items:center;gap:4px}
+.who{display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--line2);border-radius:8px;padding:5px 12px 5px 5px;font-size:13.5px}
+.who:hover{border-color:var(--ink)}
+.ava{width:24px;height:24px;border-radius:6px;background:var(--quince-soft);color:var(--quince-dk);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600}
+
+.btn{border:1px solid var(--line2);background:var(--card);padding:9px 15px;border-radius:8px;font-size:13.5px;font-weight:500;letter-spacing:-0.01em;transition:border-color .15s,background .15s,color .15s}
+.btn:hover{border-color:var(--ink)}
+.btn-primary{background:var(--quince);border-color:var(--quince);color:#fff}
+.btn-primary:hover{background:var(--quince-dk);border-color:var(--quince-dk)}
+.btn-lg{padding:13px 20px;font-size:15px;width:100%}
+.btn-ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn-ghost:hover{color:var(--ink);background:var(--tint2);border-color:transparent}
+.btn-sm{padding:5px 11px;font-size:12.5px}
+.btn-bad{color:var(--bad);border-color:#E0CBC5}
+.btn-bad:hover{background:var(--bad-soft);border-color:var(--bad)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+/* ── панель фильтров ───────────────────────────────────── */
+.bar{position:sticky;top:60px;z-index:20;background:var(--paper);margin:0 -28px 0;padding:0 28px;border-bottom:1px solid var(--line)}
+.bar-in{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 0 10px}
+.bar-2{gap:8px;padding:0 0 12px}
+.cats{display:flex;gap:4px;flex-wrap:wrap;margin-left:-10px}
+.chip{border:0;background:none;padding:6px 10px;font-size:14px;font-weight:500;letter-spacing:-0.01em;color:var(--muted);border-radius:8px;display:flex;align-items:baseline;gap:6px}
+.chip:hover{background:var(--tint2);color:var(--ink)}
+.chip i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chip[aria-pressed="true"] i{color:rgba(255,255,255,.6)}
+.search{position:relative;display:block;flex:1;min-width:190px;max-width:270px;margin-left:auto}
+.search input{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:14px}
+.search input::placeholder{color:var(--faint)}
+.search input:focus{outline:0;border-color:var(--quince);box-shadow:0 0 0 3px var(--quince-soft)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--faint)}
+.quicks{display:flex;gap:7px;flex-wrap:wrap}
+.qf{border:1px solid var(--line);background:none;border-radius:20px;padding:5px 12px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.qf:hover{border-color:var(--line2);color:var(--ink)}
+.qf[aria-pressed="true"]{border-color:var(--quince);color:var(--quince-dk);background:var(--quince-soft)}
+.qf i{width:11px;height:11px;display:block;opacity:0}
+.qf[aria-pressed="true"] i{opacity:1}
+.sortbox{display:flex;align-items:center;gap:8px;margin-left:auto}
+select{padding:5px 26px 5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:12.5px;color:var(--ink);appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'><path d='M1 1l3.5 3.5L8 1' fill='none' stroke='%235E635E' stroke-width='1.4'/></svg>");background-repeat:no-repeat;background-position:right 10px center}
+
+/* ── список стартапов ──────────────────────────────────── */
+.reg{padding:6px 0 80px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:20px 14px;margin:0 -14px;border-radius:10px;position:relative;transition:background .14s}
+.row:hover{background:var(--card);box-shadow:0 1px 0 var(--line),0 12px 30px -26px rgba(18,20,18,.6)}
+.r-main{min-width:0}
+.r-title{display:block;font-size:19px;font-weight:600;letter-spacing:-0.03em;line-height:1.2}
+.r-tag{display:block;font-size:14px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px;margin-top:9px;font-family:var(--mono);font-size:11.5px;color:var(--faint);letter-spacing:-0.01em}
+.r-meta span{display:flex;align-items:center;gap:4px}
+.r-meta .sep{width:3px;height:3px;border-radius:50%;background:var(--line2);display:block}
+.r-cat{color:var(--ink);font-weight:500}
+.r-rev{color:var(--quince);font-weight:500}
+.r-price{text-align:right;white-space:nowrap}
+.r-price b{display:block;font-family:var(--mono);font-size:27px;font-weight:600;letter-spacing:-0.045em;line-height:1;transition:color .14s}
+.row:hover .r-price b{color:var(--quince)}
+.r-price span{display:block;font-size:11.5px;color:var(--faint);margin-top:6px}
+.empty{padding:56px 2px;color:var(--muted);font-size:14.5px}
+.empty b{display:block;color:var(--ink);font-weight:600;margin-bottom:5px;font-size:16px;letter-spacing:-0.02em}
+
+/* ── скриншоты ─────────────────────────────────────────── */
+.drop{border:1.5px dashed var(--line2);border-radius:10px;background:var(--card);padding:20px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--quince);background:var(--quince-soft)}
+.drop b{display:block;font-size:14px;font-weight:500;margin-bottom:3px}
+.drop span{font-size:12.5px;color:var(--muted)}
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;margin-top:12px}
+.shots:empty{display:none}
+.shot{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--tint);aspect-ratio:4/3}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.shot .x{position:absolute;top:5px;right:5px;width:22px;height:22px;border:0;border-radius:6px;background:rgba(18,20,18,.72);color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+.shot .cover{position:absolute;left:5px;bottom:5px;background:rgba(18,20,18,.72);color:#fff;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:5px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin:0 0 30px}
+.gal-i{padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--tint);aspect-ratio:16/10;display:block}
+.gal-i img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+.gal-i:hover img{transform:scale(1.04)}
+.lb{background:rgba(12,14,12,.88);cursor:zoom-out}
+.lb img{max-width:min(1100px,94vw);max-height:86vh;border-radius:10px;background:#fff}
+.lb-x{position:fixed;top:16px;right:18px;width:36px;height:36px;border:0;border-radius:10px;background:rgba(255,255,255,.16);color:#fff;font-size:20px;line-height:1;padding:0}
+.minis{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.minis img{width:54px;height:40px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
+
+/* ── общие мелочи ──────────────────────────────────────── */
+.tag{font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--tint);color:var(--muted);border:1px solid var(--line);white-space:nowrap}
+.tag-ok{background:var(--quince-soft);border-color:#C7DFD1;color:var(--quince-dk)}
+.tag-wait{background:#FAF1DA;border-color:#EADCB8;color:#7A5C10}
+.tag-bad{background:var(--bad-soft);border-color:#E7D0CA;color:var(--bad)}
+.price{font-family:var(--mono);font-size:19px;font-weight:600;letter-spacing:-0.035em;white-space:nowrap;text-align:right}
+.price small{display:block;font-family:var(--ui);font-size:11.5px;font-weight:400;color:var(--faint);letter-spacing:0;margin-top:3px}
+.back{background:none;border:0;padding:18px 0;font-size:13.5px;color:var(--muted)}
+.back:hover{color:var(--ink)}
+.shield{display:flex;gap:9px;font-size:12.5px;color:var(--muted);line-height:1.45;background:var(--tint2);border:1px solid var(--line);padding:11px 12px;border-radius:8px}
+.shield svg{flex:none;margin-top:2px;color:var(--quince)}
+.meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.line{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;color:var(--muted);padding:4px 0}
+.line b{font-weight:500;color:var(--ink)}
+.stack{display:flex;flex-direction:column;gap:8px}
+
+/* ── страница проекта ──────────────────────────────────── */
+.detail{display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:start;padding-bottom:76px}
+.detail h1{margin:10px 0 8px;font-size:34px;line-height:1.1;letter-spacing:-0.04em;font-weight:600;max-width:18ch}
+.lede{font-size:16px;color:var(--muted);margin:0 0 30px;max-width:56ch;line-height:1.55}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;margin-bottom:34px}
+.stat b{display:block;font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:-0.04em;margin-top:6px}
+.stat span{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:500}
+.sec{margin-bottom:30px;max-width:64ch}
+.sec h3{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px;color:var(--faint)}
+.sec p{margin:0;color:#2B302C;font-size:15px;line-height:1.6}
+.sec ul{margin:0;padding:0;list-style:none}
+.sec li{position:relative;padding:7px 0 7px 20px;font-size:15px;color:#2B302C}
+.sec li::before{content:"";position:absolute;left:3px;top:15px;width:5px;height:5px;border-radius:50%;background:var(--quince)}
+.panel{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:20px;position:sticky;top:86px}
+.panel .big{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-0.05em;margin:4px 0 3px}
+.panel .note{font-size:12.5px;color:var(--muted);margin-bottom:18px}
+.panel hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+
+/* ── формы ─────────────────────────────────────────────── */
+.form{max-width:530px;padding-bottom:80px}
+.form h1{margin:6px 0 10px;font-size:27px;letter-spacing:-0.035em;font-weight:600}
+.form>p{color:var(--muted);margin:0 0 28px;font-size:14.5px;max-width:52ch}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--ink);margin-bottom:7px}
+.field .hint{font-size:12px;color:var(--faint);font-weight:400;margin-left:6px}
+.field input,.field textarea,.field select{width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:8px;background:var(--card);font-size:14.5px}
+.field textarea{min-height:104px;resize:vertical;line-height:1.5}
+.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:var(--quince);box-shadow:0 0 0 3px var(--quince-soft)}
+.field.bad input,.field.bad textarea{border-color:var(--bad)}
+.err{display:none;color:var(--bad);font-size:12.5px;margin-top:5px}
+.field.bad .err{display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.calc{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:16px;margin:22px 0 26px}
+.calc .line{padding:5px 0;font-size:13.5px}
+.calc .tot{border-top:1px solid var(--line);margin-top:9px;padding-top:11px;font-size:15px;color:var(--ink);font-weight:600}
+
+/* ── оплата ────────────────────────────────────────────── */
+.pay{max-width:530px;padding-bottom:84px}
+.pay h1{margin:6px 0 10px;font-size:27px;letter-spacing:-0.035em;font-weight:600}
+.pay>p{color:var(--muted);margin:0 0 24px;font-size:14.5px}
+.method{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:14px 15px;margin-bottom:8px;background:var(--card)}
+.method:hover{border-color:var(--line2)}
+.method[aria-checked="true"]{border-color:var(--quince);background:var(--quince-soft)}
+.radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line2);flex:none;margin-top:3px;display:flex;align-items:center;justify-content:center}
+.method[aria-checked="true"] .radio{border-color:var(--quince)}
+.method[aria-checked="true"] .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--quince)}
+.method b{display:block;font-size:14.5px;font-weight:500}
+.method span{font-size:12.5px;color:var(--muted)}
+.paying{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:14.5px;padding:28px 0}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--quince);animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── сделка ────────────────────────────────────────────── */
+.deal-page{padding-bottom:84px}
+.deal-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.deal-head h1{margin:9px 0 6px;font-size:26px;letter-spacing:-0.035em;font-weight:600}
+.deal-head .sub{font-size:12.5px;color:var(--muted)}
+.track{display:flex;margin:26px 0 30px}
+.step{flex:1;position:relative;padding-top:22px;padding-right:12px;font-size:12px;color:var(--faint)}
+.step::before{content:"";position:absolute;top:5px;left:0;width:9px;height:9px;border-radius:50%;background:var(--paper);border:1.5px solid var(--line2);z-index:2}
+.step::after{content:"";position:absolute;top:9.5px;left:9px;right:0;height:1px;background:var(--line)}
+.step:last-child::after{display:none}
+.step.done::before{background:var(--quince);border-color:var(--quince)}
+.step.done::after{background:var(--quince)}
+.step.now::before{border-color:var(--quince);box-shadow:0 0 0 3px var(--quince-soft)}
+.step.now{color:var(--ink);font-weight:500}
+.cols{display:grid;grid-template-columns:1fr 300px;gap:56px;align-items:start}
+.tl{border-top:1px solid var(--line)}
+.tl div{padding:12px 2px;border-bottom:1px solid var(--line);font-size:14px;color:#2B302C;display:flex;justify-content:space-between;gap:16px}
+.tl time{font-family:var(--mono);color:var(--faint);font-size:11.5px;white-space:nowrap}
+
+/* ── кабинет ───────────────────────────────────────────── */
+.cab{padding-bottom:76px}
+.cab h1{margin:8px 0 20px;font-size:27px;letter-spacing:-0.035em;font-weight:600}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:2px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font-size:13.5px;color:var(--muted);white-space:nowrap;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--quince)}
+.tab .dot{display:inline-block;min-width:17px;padding:0 5px;height:17px;line-height:17px;border-radius:9px;background:var(--tint);font-family:var(--mono);font-size:10.5px;margin-left:6px;color:var(--muted)}
+.item{border-bottom:1px solid var(--line);padding:16px 14px;margin:0 -14px;display:flex;justify-content:space-between;gap:18px;align-items:flex-start;width:calc(100% + 28px);text-align:left;background:none;border-left:0;border-right:0;border-top:0;border-radius:10px;transition:background .14s}
+button.item:hover{background:var(--card);box-shadow:0 1px 0 var(--line)}
+.item-t{font-size:15px;font-weight:500;letter-spacing:-0.015em;margin-bottom:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.item-m{font-size:12.5px;color:var(--muted)}
+
+/* ── чат ───────────────────────────────────────────────── */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:430px;padding-bottom:34px}
+.chat-head{border-bottom:1px solid var(--line);padding-bottom:14px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.chat-head h2{margin:0 0 2px;font-size:18px;font-weight:600;letter-spacing:-0.025em}
+.chat-head span{font-size:12.5px;color:var(--muted)}
+.msgs{flex:1;overflow-y:auto;padding:18px 2px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:72%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.45;border:1px solid var(--line)}
+.msg time{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:3px}
+.msg.them{background:var(--card);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.me{background:var(--quince-soft);border-color:#C7DFD1;align-self:flex-end;border-bottom-right-radius:4px}
+.msg.sys{align-self:center;background:#FAF1DA;border-color:#EADCB8;color:#7A5C10;font-size:12.5px;text-align:center;max-width:52ch}
+.compose{display:flex;gap:9px;border-top:1px solid var(--line);padding-top:14px;align-items:flex-end}
+.compose textarea{flex:1;min-height:44px;max-height:130px;padding:11px 13px;border:1px solid var(--line2);border-radius:10px;resize:none;font-size:14.5px;line-height:1.4}
+.compose textarea:focus{outline:0;border-color:var(--quince);box-shadow:0 0 0 3px var(--quince-soft)}
+.masked{color:var(--bad);font-weight:500}
+
+/* ── модалка ───────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(18,20,18,.35);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:14px;width:100%;max-width:396px;padding:26px 24px 22px}
+.modal h2{margin:0 0 6px;font-size:21px;font-weight:600;letter-spacing:-0.03em}
+.modal>p{margin:0 0 22px;color:var(--muted);font-size:14px}
+.btn-ya{background:#FC3F1D;border-color:#FC3F1D;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-ya:hover{background:#E5350F;border-color:#E5350F}
+.btn-ya svg{flex:none}
+.btn-ya[disabled]{opacity:.55}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0 18px;color:var(--faint);font-size:12px;white-space:nowrap}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.modal .foot{margin-top:14px;font-size:12px;color:var(--faint);text-align:center;line-height:1.45}
+
+/* ── панель владельца ──────────────────────────────────── */
+.admin{padding-bottom:84px}
+.admin h1{margin:8px 0 4px;font-size:27px;letter-spacing:-0.035em;font-weight:600}
+.admin .sub{color:var(--muted);font-size:14px;margin:0 0 26px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;margin-bottom:36px}
+.kpi b{display:block;font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-0.045em;margin:6px 0 3px}
+.kpi span{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:500}
+.kpi i{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}
+.kpi.hi b{color:var(--quince)}
+.tbl{border-top:1px solid var(--line);margin-bottom:36px}
+.tr{display:grid;grid-template-columns:112px 1.4fr 1fr 112px 104px 168px;gap:16px;padding:12px 2px;border-bottom:1px solid var(--line);align-items:center;font-size:13.5px}
+.th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:500;padding:8px 2px}
+.tr .sm{font-size:12px;color:var(--muted)}
+.tr select{width:100%;padding:6px 24px 6px 9px;font-size:12.5px}
+.admin h3{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:0 0 12px}
+.modrow{border-bottom:1px solid var(--line);padding:14px 2px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.acts{display:flex;gap:8px}
+
+footer{border-top:1px solid var(--line);padding:24px 0 46px;font-size:12.5px;color:var(--faint)}
+footer div{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+footer button{background:none;border:0;padding:0;font-size:12.5px;color:var(--faint);text-decoration:underline;text-underline-offset:3px}
+footer button:hover{color:var(--ink)}
+.loading{padding:56px 2px;color:var(--muted);font-size:14.5px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:10px;font-size:13.5px;z-index:80;max-width:min(92vw,460px);text-align:center}
+
+@media (max-width:940px){
+  .kpis{grid-template-columns:1fr 1fr;gap:20px 24px}
+  .tr{grid-template-columns:1fr;gap:5px;padding:14px 2px}
+  .tr.th{display:none}
+  .tr .cell::before{content:attr(data-l) " ";color:var(--faint);font-size:12px}
+}
+@media (max-width:820px){
+  .wrap{padding:0 18px}
+  .bar{margin:0 -18px;padding:0 18px}
+  .search{margin-left:0;max-width:none;order:-1;flex-basis:100%}
+  .cats{overflow-x:auto;flex-wrap:nowrap;width:100%;margin-left:0;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .sortbox{margin-left:auto}
+  .row{grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:16px 12px;margin:0 -12px}
+  .r-title{font-size:17px}
+  .r-price b{font-size:21px}
+  .detail,.cols{grid-template-columns:1fr;gap:30px}
+  .panel{position:static}
+  .detail h1{font-size:28px}
+  .stats{grid-template-columns:1fr 1fr;gap:16px}
+  .two{grid-template-columns:1fr}
+  .track{flex-direction:column;gap:12px}
+  .step{padding:0 0 0 20px}
+  .step::before{top:3px}
+  .step::after{display:none}
+  .head{height:54px}
+  .bar{top:54px}
+  .msg{max-width:88%}
+  .chat{height:auto;min-height:0}
+  .msgs{max-height:52vh}
+}
+@media (max-width:560px){
+  .r-tag{white-space:normal}
+  .r-price b{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head">
+    <button class="brand" id="logo">
+      <svg width="22" height="24" viewBox="0 0 24 26" fill="none" aria-hidden="true">
+        <path d="M12 7.6c2.5-2.3 7.2-1.4 8.1 2.6.9 3.9-1.6 9.4-5 11.1-1.5.8-2.4.1-3.1.1s-1.6.7-3.1-.1c-3.4-1.7-5.9-7.2-5-11.1.9-4 5.6-4.9 8.1-2.6Z" fill="#E8F0EA" stroke="#1C6B3F" stroke-width="1.5"/>
+        <path d="M12 7.8V4.4" stroke="#1C6B3F" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M12.4 5.3c1-1.9 2.9-2.4 4.2-2.3.2 1.4-.5 3.1-2.2 3.7-.9.3-1.6.1-2-.4-.2-.3-.2-.7 0-1Z" fill="#B8891B"/>
+      </svg>
+      <b>Айва</b>
+    </button>
+    <nav id="nav"></nav>
+  </div>
+</header>
+
+<main id="app" class="wrap"><div class="loading">Загружаем Айву…</div></main>
+
+<footer class="wrap">
+  <div>
+    <span>Айва</span>
+    <button id="adminLink">Панель владельца</button>
+  </div>
+</footer>
+
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   ПОДКЛЮЧЕНИЕ SUPABASE
+   Вставьте два значения из Project Settings → API.
+   Пока они пустые, Айва работает в демо-режиме: данные лежат
+   только в этом браузере. SQL для таблиц — в файле schema.sql.
+
+   ВХОД ЧЕРЕЗ ЯНДЕКС ID (Supabase → Authentication → Custom Providers):
+   1) oauth.yandex.ru → приложение, права «Доступ к адресу почты»
+      и «Доступ к имени и фамилии»;
+   2) Redirect URI приложения = Callback URL из формы Supabase:
+      https://<ваш-проект>.supabase.co/auth/v1/callback
+   3) Supabase → Create Custom Auth Provider:
+      Provider Identifier: yandex  (в коде ниже — YA_PROVIDER)
+      Configuration Method: Manual configuration — авто-поиск не
+      сработает, у Яндекса нет /.well-known/openid-configuration
+      Authorization: https://oauth.yandex.ru/authorize
+      Token:         https://oauth.yandex.ru/token
+      User info:     https://login.yandex.ru/info?format=json
+      Scopes:        login:email,login:info
+      Client ID / Secret — из приложения Яндекса
+   4) Authentication → URL Configuration → Redirect URLs: адрес,
+      на котором лежит эта страница.
+   ============================================================ */
+const SUPABASE_URL = 'https://ckxyzhyhmiostyjejflx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNreHl6aHlobWlvc3R5amVqZmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDcxODMsImV4cCI6MjEwMzkyMzE4M30.GovGkgbb7Iuo261KjKuIhPtdu35yO8UrPn9s7Rp1DU8';
+const REMOTE = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+let session = null;
+
+async function sbFetch(path, opts = {}){
+  const headers = Object.assign({
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + ((session && session.access_token) || SUPABASE_ANON_KEY),
+    'Content-Type': 'application/json'
+  }, opts.headers || {});
+  const res = await fetch(SUPABASE_URL + path, Object.assign({}, opts, {headers}));
+  const raw = await res.text();
+  let data = null; try{ data = raw ? JSON.parse(raw) : null; }catch(e){ data = raw; }
+  if(!res.ok) throw new Error((data && (data.error_description || data.msg || data.message || data.error)) || 'ошибка запроса');
+  return data;
+}
+const sbSelect = (t, q='') => sbFetch(`/rest/v1/${t}?${q}`);
+const sbInsert = (t, row, prefer='return=minimal') => sbFetch(`/rest/v1/${t}`, {method:'POST', headers:{Prefer:prefer}, body:JSON.stringify(row)});
+const sbUpdate = (t, q, patch) => sbFetch(`/rest/v1/${t}?${q}`, {method:'PATCH', headers:{Prefer:'return=minimal'}, body:JSON.stringify(patch)});
+async function push(fn){
+  if(!REMOTE || !session) return;
+  try{ await fn(); }catch(e){ console.error(e); toast('Сервер не принял изменение: ' + e.message); }
+}
+
+async function setSession(d){
+  session = {access_token:d.access_token, refresh_token:d.refresh_token};
+  const u = d.user || (await sbFetch('/auth/v1/user'));
+  const md = u.user_metadata || {};
+  const name = md.name || md.full_name || md.display_name || md.real_name
+            || md.first_name || md.login || (u.email || '').split('@')[0] || 'Пользователь';
+  const raw = (u.app_metadata && (u.app_metadata.provider || (u.app_metadata.providers||[])[0])) || 'email';
+  const provider = /yandex/i.test(String(raw)) ? 'yandex' : raw;
+  store.user = {id:u.id, name, email:u.email || '', provider,
+                since:new Date(u.created_at || Date.now()).toLocaleDateString('ru-RU')};
+  store.session = session;
+  await save();
+  await push(() => sbInsert('profiles', {id:u.id, name:store.user.name}, 'resolution=merge-duplicates'));
+}
+async function sbSignUp(email, password, name){
+  const d = await sbFetch('/auth/v1/signup', {method:'POST', body:JSON.stringify({email, password, data:{name}})});
+  if(d.access_token){ await setSession(d); return {ok:true}; }
+  return {ok:false, confirm:true};
+}
+async function sbSignIn(email, password){
+  const d = await sbFetch('/auth/v1/token?grant_type=password', {method:'POST', body:JSON.stringify({email, password})});
+  await setSession(d); return {ok:true};
+}
+const YA_LOGO = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect width="18" height="18" rx="4" fill="#fff"/><path d="M9.9 14V4.9h-.8c-1.3 0-2 .7-2 1.8 0 1.2.5 1.7 1.5 2.4l.9.6L7 14H5.3l2.3-3.9C6.3 9.2 5.6 8.3 5.6 6.8 5.6 4.9 6.9 3.6 9.1 3.6h2.4V14H9.9Z" fill="#FC3F1D"/></svg>`;
+
+/* вход через Яндекс ID — OAuth-провайдер Supabase */
+let oauthNote = null;
+const YA_PROVIDER = 'custom:yandex';   // Provider Identifier из формы Supabase
+function yandexUrl(){
+  const back = location.origin + location.pathname;
+  return SUPABASE_URL + '/auth/v1/authorize?provider=' + encodeURIComponent(YA_PROVIDER)
+       + '&redirect_to=' + encodeURIComponent(back);
+}
+async function yandexLogin(){
+  if(!REMOTE){
+    store.user = {id:'local', name:'Гость Яндекса', email:'guest@yandex.ru', provider:'yandex', since:today()};
+    await save();
+    document.getElementById('modal').innerHTML = '';
+    const cb = pending; pending = null;
+    renderNav(); if(cb) cb(); else render();
+    toast('Демо-режим: вход через Яндекс сымитирован');
+    return;
+  }
+  // запоминаем, куда человек шёл: после возврата с Яндекса страница перезагрузится
+  try{ await window.storage.set('ayva:intent', JSON.stringify({view:state.view, id:state.id})); }catch(e){}
+  location.href = yandexUrl();
+}
+/* возврат от Supabase: токены сессии прилетают в хэше адреса */
+async function consumeOAuth(){
+  if(!REMOTE) return false;
+  const h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+  const q = new URLSearchParams(location.search);
+  const token = h.get('access_token');
+  const err = h.get('error_description') || q.get('error_description');
+  if(!token && !err) return false;
+  if(token){
+    try{
+      await setSession({access_token:token, refresh_token:h.get('refresh_token')});
+      oauthNote = 'Вы вошли через Яндекс ID';
+      try{
+        const r = await window.storage.get('ayva:intent');
+        if(r && r.value){
+          const i = JSON.parse(r.value);
+          if(i.view && i.view !== 'catalog'){ state.view = i.view; if(i.id) state.id = i.id; }
+        }
+        await window.storage.delete('ayva:intent');
+      }catch(e){}
+    }catch(e){ oauthNote = 'Не удалось завершить вход: ' + e.message; }
+  } else {
+    oauthNote = 'Вход через Яндекс не завершён: ' + err;
+  }
+  history.replaceState(null, '', location.pathname);
+  return !!token;
+}
+
+async function sbRestore(){
+  if(!REMOTE || !store.session || !store.session.refresh_token) return;
+  try{
+    const d = await sbFetch('/auth/v1/token?grant_type=refresh_token', {method:'POST', body:JSON.stringify({refresh_token:store.session.refresh_token})});
+    await setSession(d);
+  }catch(e){ store.user = null; store.session = null; session = null; await save(); }
+}
+
+/* ── скриншоты: ужимаем на клиенте и кладём в Supabase Storage ───── */
+function shrinkImage(file, max = 1600, quality = 0.82){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error('файл не читается'));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('это не картинка'));
+      img.onload = () => {
+        const k = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        const preview = c.toDataURL('image/jpeg', 0.6);
+        c.toBlob(blob => blob ? resolve({blob, url:preview}) : reject(new Error('не удалось сжать')),
+                 'image/jpeg', quality);
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+async function sbUpload(path, blob){
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${SHOT_BUCKET}/${path}`, {
+    method:'POST', body:blob,
+    headers:{apikey:SUPABASE_ANON_KEY, 'x-upsert':'true', 'Content-Type':'image/jpeg',
+             Authorization:'Bearer ' + ((session && session.access_token) || SUPABASE_ANON_KEY)}
+  });
+  if(!res.ok) throw new Error('сервер ответил ' + res.status);
+  return `${SUPABASE_URL}/storage/v1/object/public/${SHOT_BUCKET}/${path}`;
+}
+async function uploadShots(listingId){
+  if(!sellShots.length) return [];
+  if(!REMOTE || !session) return sellShots.map(s => s.url);   // демо-режим: храним прямо в браузере
+  const out = [];
+  for(let i = 0; i < sellShots.length; i++){
+    const path = `${store.user.id}/${listingId}/${i + 1}-${Date.now()}.jpg`;
+    try{ out.push(await sbUpload(path, sellShots[i].blob)); }
+    catch(e){ toast(`Скриншот ${i + 1} не загрузился: ${e.message}`); }
+  }
+  return out;
+}
+async function addShots(files){
+  const picked = [...files].filter(f => /^image\/(png|jpe?g|webp)$/i.test(f.type));
+  if(!picked.length){ toast('Подойдут png, jpg или webp'); return; }
+  for(const f of picked){
+    if(sellShots.length >= SHOT_MAX){ toast(`Больше ${SHOT_MAX} снимков не нужно`); break; }
+    if(f.size > 12 * 1024 * 1024){ toast(`«${f.name}» тяжелее 12 МБ`); continue; }
+    try{ sellShots.push(await shrinkImage(f)); }
+    catch(e){ toast(`«${f.name}»: ${e.message}`); }
+  }
+  renderShots();
+}
+function renderShots(){
+  const box = document.getElementById('pshotsGrid');
+  if(!box) return;
+  box.innerHTML = sellShots.map((s, i) => `<div class="shot">
+      <img src="${s.url}" alt="Скриншот ${i + 1}">
+      ${i === 0 ? '<span class="cover">обложка</span>' : ''}
+      <button type="button" class="x" data-shot-del="${i}" aria-label="Убрать скриншот ${i + 1}">×</button>
+    </div>`).join('');
+  box.querySelectorAll('[data-shot-del]').forEach(b => b.onclick = () => {
+    sellShots.splice(+b.dataset.shotDel, 1); renderShots();
+  });
+}
+function openShot(url){
+  const box = document.getElementById('modal');
+  box.innerHTML = `<div class="overlay lb" id="lb"><img src="${esc(url)}" alt="Скриншот проекта">
+    <button class="lb-x" id="lbx" aria-label="Закрыть">×</button></div>`;
+  const onKey = e => { if(e.key === 'Escape') close(); };
+  function close(){ box.innerHTML = ''; document.removeEventListener('keydown', onKey); }
+  document.getElementById('lb').onclick = e => { if(e.target.id === 'lb') close(); };
+  document.getElementById('lbx').onclick = close;
+  document.addEventListener('keydown', onKey);
+}
+
+/* строки из базы → внутренний вид */
+const mapListing = r => ({id:r.id, title:r.title, tagline:r.tagline, cat:r.cat, price:r.price, mrr:r.mrr||0,
+  users:r.users_text, age:r.age_text, stack:r.stack, desc:r.description, why:r.why, includes:r.includes||[],
+  shots:r.shots || [], status:r.status, seller:r.seller_name, sellerId:r.seller_id, deals:'первая продажа', reply:'обычно за день',
+  mine: !!(store.user && r.seller_id === store.user.id)});
+const mapOrder = r => ({id:r.id, listingId:r.listing_id, title:r.title, price:r.price, buyer:r.buyer_name,
+  status:r.status, date:new Date(r.created_at).toLocaleDateString('ru-RU'),
+  mine: !!(store.user && r.buyer_id === store.user.id),
+  sellerMine: !!(store.user && r.seller_id === store.user.id),
+  events:(r.order_events||[]).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))
+    .map(e=>({t:new Date(e.created_at).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}), text:e.text}))});
+const mapThread = t => ({listingId:t.listing_id, threadId:t.id, title:t.title, seller:t.seller_name, price:t.price,
+  updated:new Date(t.updated_at || t.created_at).getTime(),
+  messages:(t.messages||[]).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))
+    .map(m=>({from:m.kind==='system'?'sys':(store.user && m.sender_id===store.user.id ? 'me':'them'),
+              text:m.body, time:new Date(m.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}))});
+
+async function pull(){
+  if(!REMOTE || !session) return;
+  try{
+    const [ls, os, th] = await Promise.all([
+      sbSelect('listings','select=*&order=created_at.desc'),
+      sbSelect('orders','select=*,order_events(*)&order=created_at.desc'),
+      sbSelect('threads','select=*,messages(*)&order=created_at.desc')
+    ]);
+    store.listings = ls.map(mapListing);
+    store.orders = os.map(mapOrder);
+    store.chats = {}; th.forEach(t => { store.chats[t.listing_id] = mapThread(t); });
+    await save();
+  }catch(e){ console.error(e); toast('Не удалось загрузить данные: ' + e.message); }
+}
+
+const FEE = 0.10;
+const CATS = ['Приложения','Игры','Веб-сервисы','Telegram','ИИ'];
+const FLOW = ['Заявка','Оплата','Передача доступов','Приёмка','Сделка закрыта'];
+const STATUS_STEP = {'Ожидает оплаты':0,'Оплачена':1,'Доступы переданы':2,'Завершена':4,'Отменена':-1,'Спор':2};
+const ADMIN_STATUSES = ['Ожидает оплаты','Оплачена','Доступы переданы','Завершена','Спор','Отменена'];
+
+const SEED = [
+  {id:'s1',title:'Запись24',cat:'Telegram',tagline:'Бот онлайн-записи для мастеров маникюра и барберов',
+   price:320000,mrr:41000,users:'620 мастеров',age:'2 года',stack:'Python, aiogram, PostgreSQL',
+   desc:'Бот ведёт запись клиентов, напоминает о визите и считает загрузку недели. Платные тарифы от 590 ₽ в месяц. Отток последние полгода 4–5% в месяц, продажи идут из двух профильных чатов без рекламного бюджета.',
+   includes:['Исходники бота и админки','База 620 активных мастеров','Подключённая касса и домен','Два месяца сопровождения в чате Айвы'],
+   why:'Основной работой стало агентство, на поддержку не хватает времени.',seller:'Артём К.',deals:'2 продажи на Айве',reply:'обычно за час'},
+  {id:'s2',title:'Привычка каждый день',cat:'Приложения',tagline:'Трекер привычек для Android в RuStore',
+   price:150000,mrr:18000,users:'12 400 установок',age:'1 год 4 месяца',stack:'Kotlin, Jetpack Compose, Firebase',
+   desc:'Приложение в топе категории «Здоровье» в RuStore. Монетизация — подписка 199 ₽ в месяц и разовая покупка тем. Органика даёт 600–800 установок в неделю, реклама не закупалась ни разу.',
+   includes:['Репозиторий и ключ подписи','Аккаунт разработчика переносится на покупателя','Подключённый RuStore Billing','Макеты и иконки в Figma'],
+   why:'Ухожу в другой проект, приложению нужен активный владелец.',seller:'Мария Л.',deals:'первая продажа',reply:'обычно за день'},
+  {id:'s3',title:'Лунный дрифт',cat:'Игры',tagline:'Браузерная 3D-аркада на Яндекс Играх',
+   price:240000,mrr:26000,users:'38 000 игроков в месяц',age:'8 месяцев',stack:'Three.js, один HTML-файл',
+   desc:'Гоночная аркада с рекламной монетизацией внутри платформы. Средний доход держится восьмой месяц, сезонных провалов не было. Игра целиком в одном файле, собирать нечего — правки вносятся за минуты.',
+   includes:['Исходник игры и все ассеты','Перенос игры внутри платформы','Инструкция по публикации обновлений'],
+   why:'Портфель из шести игр, хочу оставить три и сфокусироваться.',seller:'Андрей В.',deals:'4 продажи на Айве',reply:'обычно за час'},
+  {id:'s4',title:'Пингер',cat:'Веб-сервисы',tagline:'Мониторинг доступности сайтов с уведомлениями',
+   price:600000,mrr:51000,users:'34 платящих компании',age:'2 года 7 месяцев',stack:'Node.js, Vue, ClickHouse',
+   desc:'Сервис проверяет сайты каждую минуту и присылает уведомление, когда что-то упало. Клиенты — небольшие студии и агентства, средний чек 1 500 ₽ в месяц, годовые оплаты у трети клиентов.',
+   includes:['Инфраструктура и домен','Клиентская база и договоры','Документация по деплою','Месяц консультаций'],
+   why:'Продаю, чтобы вложиться в новый B2B-продукт.',seller:'Сергей Д.',deals:'первая продажа',reply:'обычно за день'},
+  {id:'s5',title:'Нейронки на завтрак',cat:'ИИ',tagline:'Канал про ИИ-инструменты, 21 400 подписчиков',
+   price:450000,mrr:60000,users:'21 400 подписчиков',age:'1 год 9 месяцев',stack:'Канал и контент-план',
+   desc:'Ежедневные разборы ИИ-сервисов. Средний охват поста 7 800, реклама расписана на месяц вперёд, девять постоянных рекламодателей. Подписчики набраны посевами и взаимными упоминаниями.',
+   includes:['Права администратора канала','База рекламодателей','Контент-план на два месяца','Архив закупок с ценами'],
+   why:'Веду четыре канала, этот стал непрофильным.',seller:'Ольга Р.',deals:'первая продажа',reply:'обычно за час'},
+  {id:'s6',title:'Чек-лист Про',cat:'Приложения',tagline:'Конструктор чек-листов для строительных бригад',
+   price:45000,mrr:0,users:'3 100 установок',age:'11 месяцев',stack:'Kotlin, локальная база',
+   desc:'Рабочее приложение с живой аудиторией, но без монетизации: подписку так и не подключил. Пользователи сами просят экспорт в PDF и общий доступ для бригады — обе функции можно продать.',
+   includes:['Исходники','Аккаунт в RuStore','Список запросов от пользователей'],
+   why:'Проект простаивает, жалко закрывать.',seller:'Ильдар М.',deals:'первая продажа',reply:'обычно за день'}
+];
+
+const DEMO_ORDERS = [
+  {id:'СД-418302',demo:true,sellerMine:true,listingId:'s4',title:'Пингер',price:600000,buyer:'Дмитрий Ш.',status:'Оплачена',date:'28.08.2026',events:[{t:'28.08',text:'Заявка отправлена'},{t:'28.08',text:'Деньги на счёте Айвы'}]},
+  {id:'СД-418277',demo:true,sellerMine:true,listingId:'s1',title:'Запись24',price:320000,buyer:'Камила А.',status:'Ожидает оплаты',date:'27.08.2026',events:[{t:'27.08',text:'Заявка отправлена'}]},
+  {id:'СД-418164',demo:true,listingId:'s3',title:'Лунный дрифт',price:240000,buyer:'Влад П.',status:'Завершена',date:'21.08.2026',events:[{t:'21.08',text:'Заявка отправлена'},{t:'21.08',text:'Оплата'},{t:'22.08',text:'Доступы переданы'},{t:'23.08',text:'Покупатель принял, выплата продавцу'}]},
+  {id:'СД-418090',demo:true,listingId:'s2',title:'Привычка каждый день',price:150000,buyer:'Ринат Г.',status:'Отменена',date:'19.08.2026',events:[{t:'19.08',text:'Заявка отправлена'},{t:'20.08',text:'Покупатель отменил'}]},
+  {id:'СД-417998',demo:true,listingId:'s5',title:'Нейронки на завтрак',price:450000,buyer:'Женя К.',status:'Завершена',date:'14.08.2026',events:[{t:'14.08',text:'Заявка отправлена'},{t:'15.08',text:'Оплата'},{t:'16.08',text:'Доступы переданы'},{t:'17.08',text:'Покупатель принял, выплата продавцу'}]},
+  {id:'СД-417940',demo:true,sellerMine:true,listingId:'s6',title:'Чек-лист Про',price:45000,buyer:'Настя М.',status:'Доступы переданы',date:'12.08.2026',events:[{t:'12.08',text:'Заявка отправлена'},{t:'12.08',text:'Оплата'},{t:'13.08',text:'Доступы переданы'}]}
+];
+
+let store = {user:null, session:null, listings:[], orders:[], chats:{}, seeded:false};
+let state = {view:'catalog', tab:'deals', cat:'Все', q:'', sort:'new', id:null, chatId:null, dealId:null,
+             method:'sbp', quick:{cheap:false, rev:false, pay:false}};
+let pending = null;
+let sellShots = [];                  // снимки, выбранные в форме продавца
+const SHOT_MAX = 6;                  // сколько принимаем
+const SHOT_BUCKET = 'shots';         // бакет в Supabase Storage
+
+const app = document.getElementById('app');
+const money = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const published = () => store.listings.filter(l => l.status === 'Опубликовано');
+const all = () => [...published(), ...SEED];
+const find = id => [...store.listings, ...SEED].find(l => l.id === id);
+const order = id => store.orders.find(o => o.id === id);
+const now = () => new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+const today = () => new Date().toLocaleDateString('ru-RU');
+const shortDate = () => new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});
+
+/* контакты наружу не уходят */
+const CONTACT_RE = [
+  /(?:\+?\d[\d\-\s()]{8,}\d)/g,
+  /[\w.+-]+@[\w-]+\.[\w.]{2,}/g,
+  /(?:https?:\/\/|t\.me\/|wa\.me\/|vk\.com\/|www\.)\S+/gi,
+  /(?:^|\s)@[a-zA-Z0-9_]{3,}/g
+];
+function maskContacts(text){
+  let out = text, hit = false;
+  CONTACT_RE.forEach(re => { if(re.test(out)){ hit = true; } out = out.replace(re, m => (/^\s/.test(m)?' ':'') + '[контакт скрыт]'); });
+  return {text:out, hit};
+}
+
+async function load(){
+  try{ const r = await window.storage.get('ayva:data'); if(r && r.value) store = JSON.parse(r.value); }catch(e){}
+  store.listings = store.listings || []; store.orders = store.orders || []; store.chats = store.chats || {};
+  if(REMOTE){
+    store.seeded = true;
+    const viaYandex = await consumeOAuth();
+    if(!viaYandex) await sbRestore();
+    if(session) await pull();
+  } else if(!store.seeded){
+    store.orders = [...DEMO_ORDERS]; store.seeded = true; save();
+  }
+}
+async function save(){ try{ await window.storage.set('ayva:data', JSON.stringify(store)); }catch(e){ console.error(e); } }
+
+function go(view, id){ if(view === 'sell') sellShots = []; state.view = view; if(id) state.id = id; window.scrollTo(0,0); render(); }
+function toast(t){
+  const el = document.getElementById('toast');
+  el.innerHTML = `<div class="toast">${esc(t)}</div>`;
+  setTimeout(()=>{ el.innerHTML=''; }, 3200);
+}
+
+/* вход */
+function requireAuth(reason, cb){ if(store.user){ cb(); return; } pending = cb; openAuth(reason); }
+let authMode = 'signup';
+function openAuth(reason){
+  const signup = authMode === 'signup';
+  document.getElementById('modal').innerHTML = `
+  <div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-label="Вход в Айву">
+    <h2>${signup ? 'Регистрация в Айве' : 'Вход в Айву'}</h2><p>${esc(reason)}</p>
+    <button class="btn btn-lg btn-ya" id="authYa">${YA_LOGO}Продолжить с Яндекс ID</button>
+    <div class="divider"><span>или по почте</span></div>
+    ${signup ? `<div class="field"><label for="aname">Имя и фамилия</label><input id="aname" placeholder="Иван Петров"><div class="err">Заполните поле</div></div>` : ''}
+    <div class="field"><label for="amail">Почта <span class="hint">только для входа</span></label><input id="amail" type="email" autocomplete="email" placeholder="ivan@mail.ru"><div class="err">Похоже на ошибку в адресе</div></div>
+    <div class="field"><label for="apass">Пароль</label><input id="apass" type="password" autocomplete="${signup?'new-password':'current-password'}" placeholder="минимум 6 символов"><div class="err">Пароль от 6 символов</div></div>
+    <div id="authErr" style="display:none;color:var(--bad);font-size:13.5px;margin:-6px 0 14px"></div>
+    <button class="btn btn-primary btn-lg" id="authGo">${signup ? 'Зарегистрироваться' : 'Войти'}</button>
+    <button class="btn btn-lg" id="authSwap" style="margin-top:8px">${signup ? 'У меня уже есть аккаунт' : 'Создать аккаунт'}</button>
+    <div class="foot">Почту не видят другие участники. Переписка, сделки и оплата проходят внутри Айвы.${REMOTE?'':'<br>Демо-режим: аккаунт хранится только в этом браузере.'}</div>
+  </div></div>`;
+  const close = () => { document.getElementById('modal').innerHTML=''; pending = null; };
+  document.getElementById('ov').onclick = e => { if(e.target.id === 'ov') close(); };
+  document.getElementById('authYa').onclick = () => {
+    const b = document.getElementById('authYa');
+    b.disabled = true; b.textContent = 'Переходим в Яндекс…';
+    yandexLogin();
+  };
+  document.getElementById('authSwap').onclick = () => { authMode = signup ? 'signin' : 'signup'; openAuth(reason); };
+  document.getElementById(signup ? 'aname' : 'amail').focus();
+  const fail = t => { const b = document.getElementById('authErr'); b.style.display='block'; b.textContent = t; };
+
+  document.getElementById('authGo').onclick = async () => {
+    let err = false;
+    if(signup) err = bad('aname', !val('aname')) || err;
+    err = bad('amail', !/^[\w.+-]+@[\w-]+\.[\w.]{2,}$/.test(val('amail'))) || err;
+    err = bad('apass', val('apass').length < 6) || err;
+    if(err) return;
+    const go = document.getElementById('authGo');
+    go.disabled = true; go.textContent = 'Секунду…';
+
+    if(REMOTE){
+      try{
+        const r = signup ? await sbSignUp(val('amail'), val('apass'), val('aname'))
+                         : await sbSignIn(val('amail'), val('apass'));
+        if(r.confirm){
+          go.disabled = false; go.textContent = 'Зарегистрироваться';
+          fail('Подтвердите почту по ссылке из письма, потом войдите.');
+          authMode = 'signin'; return;
+        }
+        await pull();
+      }catch(e){
+        go.disabled = false; go.textContent = signup ? 'Зарегистрироваться' : 'Войти';
+        const m = String(e.message);
+        fail(/Invalid login/i.test(m) ? 'Неверная почта или пароль.'
+           : /already registered|User already/i.test(m) ? 'Такая почта уже зарегистрирована — войдите.'
+           : m);
+        return;
+      }
+    } else {
+      store.user = {id:'local', name:signup ? val('aname') : val('amail').split('@')[0], email:val('amail'), since:today()};
+      await save();
+    }
+    document.getElementById('modal').innerHTML = '';
+    const cb = pending; pending = null;
+    renderNav(); if(cb) cb(); else render();
+    toast(signup ? 'Аккаунт создан' : 'Вы вошли в Айву');
+  };
+}
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = store.user
+    ? `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nSell">Стать продавцом</button>
+       <button class="who" id="nCab"><span class="ava">${esc(store.user.name.trim()[0]||'·')}</span>Кабинет</button>`
+    : `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nCab">Кабинет</button><button class="btn btn-primary" id="nSell">Стать продавцом</button>`;
+  nav.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => go('catalog'));
+  document.getElementById('nSell').onclick = () => requireAuth('Чтобы выставить проект на продажу, представьтесь.', () => go('sell'));
+  document.getElementById('nCab').onclick = () => requireAuth('В кабинете лежат ваши сделки и переписка.', () => go('cabinet'));
+}
+
+const CHECK = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.4 4.6 9 10 3.2"/></svg>`;
+const KIND_LABEL = {'Приложения':'Приложение','Игры':'Игра','Веб-сервисы':'Веб-сервис','Telegram':'Telegram-проект','ИИ':'ИИ-проект'};
+const ORDER = ['Все','Приложения','Игры','Telegram','Веб-сервисы','ИИ'];
+const QUICKS = [['cheap','до 100 тыс. ₽'],['rev','с выручкой'],['pay','окупаемость до 12 мес.']];
+function assetRow(l){
+  const payback = l.mrr > 0 ? Math.round(l.price/l.mrr) : null;
+  const dot = `<span class="sep" aria-hidden="true"></span>`;
+  const bits = [`<span class="r-cat">${esc(KIND_LABEL[l.cat]||l.cat)}</span>`];
+  if(l.mrr > 0) bits.push(`<span class="r-rev">${money(l.mrr)}/мес</span>`);
+  if(l.users) bits.push(`<span>${esc(l.users)}</span>`);
+  if(l.age) bits.push(`<span>${esc(l.age)}</span>`);
+  return `<button class="row" data-open="${l.id}">
+    <span class="r-main">
+      <span class="r-title">${esc(l.title)}</span>
+      <span class="r-tag">${esc(l.tagline)}</span>
+      <span class="r-meta">${bits.join(dot)}</span>
+    </span>
+    <span class="r-price">
+      <b>${money(l.price)}</b>
+      <span>${payback?`окупаемость ${payback} мес.`:'без выручки'}</span>
+    </span>
+  </button>`;
+}
+
+function viewCatalog(){
+  let list = all();
+  if(state.cat !== 'Все') list = list.filter(l => l.cat === state.cat);
+  if(state.q.trim()){ const q = state.q.toLowerCase(); list = list.filter(l => (l.title+' '+l.tagline+' '+l.cat+' '+(l.stack||'')).toLowerCase().includes(q)); }
+  if(state.quick.cheap) list = list.filter(l => l.price <= 100000);
+  if(state.quick.rev)   list = list.filter(l => l.mrr > 0);
+  if(state.quick.pay)   list = list.filter(l => l.mrr > 0 && l.price/l.mrr <= 12);
+  if(state.sort === 'cheap') list.sort((a,b)=>a.price-b.price);
+  if(state.sort === 'rich')  list.sort((a,b)=>b.price-a.price);
+  if(state.sort === 'mrr')   list.sort((a,b)=>b.mrr-a.mrr);
+
+  const pool = all();
+  const cnt = c => c === 'Все' ? pool.length : pool.filter(l => l.cat === c).length;
+
+  return `
+  <div class="bar">
+    <div class="bar-in">
+      <div class="cats">${ORDER.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${state.cat===c}">${c}<i>${cnt(c)}</i></button>`).join('')}</div>
+      <label class="search">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="4.6"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="Поиск" value="${esc(state.q)}">
+      </label>
+    </div>
+    <div class="bar-in bar-2">
+      <div class="quicks">${QUICKS.map(([k,t])=>`<button class="qf" data-quick="${k}" aria-pressed="${!!state.quick[k]}"><i>${CHECK}</i>${t}</button>`).join('')}</div>
+      <div class="sortbox">
+        <select id="sort" aria-label="Сортировка">
+          <option value="new"${state.sort==='new'?' selected':''}>Сначала новые</option>
+          <option value="cheap"${state.sort==='cheap'?' selected':''}>Дешевле</option>
+          <option value="rich"${state.sort==='rich'?' selected':''}>Дороже</option>
+          <option value="mrr"${state.sort==='mrr'?' selected':''}>По выручке</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="reg">
+    ${list.length ? list.map(assetRow).join('')
+      : `<div class="empty"><b>Ничего не нашлось</b>Снимите фильтр или выберите другую категорию.</div>`}
+  </div>`;
+}
+function plural(n,a,b,c){const d=n%100,e=n%10;if(d>4&&d<20)return c;if(e===1)return a;if(e>1&&e<5)return b;return c;}
+
+/* страница проекта */
+function viewListing(){
+  const l = find(state.id);
+  if(!l) return `<div class="empty"><b>Проект не найден</b></div>`;
+  const checked = SEED.some(x => x.id === l.id);
+  const payback = l.mrr > 0 ? Math.round(l.price/l.mrr) : null;
+  return `
+  <button class="back" data-go="catalog">← Все проекты</button>
+  <div class="detail">
+    <div>
+      <div class="lbl">${esc(KIND_LABEL[l.cat]||l.cat)}${checked?' · проверено Айвой':''}</div>
+      <h1>${esc(l.title)}</h1>
+      <p class="lede">${esc(l.tagline)}</p>
+      ${(l.shots && l.shots.length) ? `<div class="gal">${l.shots.map((u, i) =>
+        `<button class="gal-i" data-shot="${esc(u)}"><img src="${esc(u)}" loading="lazy" alt="Скриншот ${i + 1}: ${esc(l.title)}"></button>`).join('')}</div>` : ''}
+      <div class="stats">
+        <div class="stat"><span>Выручка / мес</span><b class="num">${l.mrr>0?money(l.mrr):'нет'}</b></div>
+        <div class="stat"><span>Аудитория</span><b>${esc(l.users||'—')}</b></div>
+        <div class="stat"><span>Возраст проекта</span><b>${esc(l.age||'—')}</b></div>
+      </div>
+      <div class="sec"><h3>О проекте</h3><p>${esc(l.desc)}</p></div>
+      ${l.stack?`<div class="sec"><h3>На чём сделано</h3><p>${esc(l.stack)}</p></div>`:''}
+      ${l.includes&&l.includes.length?`<div class="sec"><h3>Что входит в сделку</h3><ul>${l.includes.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`:''}
+      ${l.why?`<div class="sec"><h3>Почему продаётся</h3><p>${esc(l.why)}</p></div>`:''}
+    </div>
+    <aside class="panel">
+      <div class="lbl">Цена проекта</div>
+      <div class="big num">${money(l.price)}</div>
+      <div class="note">${payback?`окупается за ${payback} мес. при текущей выручке`:'проект без выручки'}</div>
+      <div class="stack">
+        <button class="btn btn-primary btn-lg" data-order="${l.id}">Оформить заказ</button>
+        <button class="btn btn-lg" data-chat="${l.id}">Написать продавцу</button>
+      </div>
+      <hr>
+      <div class="line"><span>Продавец</span><b>${esc(l.seller||'вы')}</b></div>
+      <div class="line"><span>История</span><b>${esc(l.deals||'первая продажа')}</b></div>
+      <div class="line"><span>Отвечает</span><b>${esc(l.reply||'обычно за день')}</b></div>
+      <hr>
+      <div class="shield">${shieldIcon()}<span>Деньги хранятся на счёте Айвы и уходят продавцу только после того, как вы подтвердите передачу доступов.</span></div>
+    </aside>
+  </div>`;
+}
+const shieldIcon = () => `<svg width="15" height="16" viewBox="0 0 15 16" fill="none"><path d="M7.5 1l5.5 2v5c0 3.4-2.3 6.1-5.5 7-3.2-.9-5.5-3.6-5.5-7V3l5.5-2Z" stroke="#1E6B48" stroke-width="1.3" stroke-linejoin="round"/><path d="M5.2 8l1.7 1.7L10 6.6" stroke="#1E6B48" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* чат */
+async function openChat(listingId){
+  const l = find(listingId);
+  if(!store.chats[listingId]){
+    const tid = listingId + ':' + (store.user.id || 'local');
+    const hello = 'Переписка идёт внутри Айвы. Обмен телефонами, почтой и ссылками на мессенджеры отключён: так сделка остаётся под защитой.';
+    store.chats[listingId] = {listingId, threadId:tid, title:l.title, seller:l.seller, price:l.price, updated:Date.now(),
+      messages:[{from:'sys', text:hello}]};
+    await save();
+    await push(async () => {
+      await sbInsert('threads', {id:tid, listing_id:listingId, buyer_id:store.user.id, title:l.title,
+        seller_name:l.seller, price:l.price}, 'resolution=merge-duplicates');
+      await sbInsert('messages', {thread_id:tid, sender_id:store.user.id, kind:'system', body:hello});
+    });
+  }
+  state.chatId = listingId; go('chat');
+}
+function viewChat(){
+  const c = store.chats[state.chatId];
+  if(!c) return `<div class="empty"><b>Чат не найден</b></div>`;
+  return `
+  <button class="back" data-back-cab="chats">Назад в кабинет</button>
+  <div class="chat">
+    <div class="chat-head">
+      <div><h2>${esc(c.seller)}</h2><span>по проекту «${esc(c.title)}»</span></div>
+      <div style="text-align:right">
+        <div class="price num" style="font-size:18px">${money(c.price)}</div>
+        <button class="btn btn-sm" data-order="${c.listingId}" style="margin-top:6px">Оформить заказ</button>
+      </div>
+    </div>
+    <div class="msgs" id="msgs">
+      ${c.messages.map(m => m.from==='sys'
+        ? `<div class="msg sys">${esc(m.text)}</div>`
+        : `<div class="msg ${m.from==='me'?'me':'them'}">${hl(m.text)}<time>${esc(m.time||'')}</time></div>`).join('')}
+    </div>
+    <div class="compose">
+      <textarea id="mtext" placeholder="Спросите про метрики, доступы или торг" rows="1"></textarea>
+      <button class="btn btn-primary" id="msend">Отправить</button>
+    </div>
+  </div>`;
+}
+const hl = t => esc(t).replace(/\[контакт скрыт\]/g, '<span class="masked">[контакт скрыт]</span>');
+const REPLIES = [
+  'Здравствуйте. Готов ответить по любым цифрам, могу показать экраны статистики прямо здесь.',
+  'Доступы передаю в день оплаты, первый месяц помогаю с поддержкой.',
+  'По цене готов немного подвинуться, если выходим на сделку на этой неделе.'
+];
+async function sendMsg(){
+  const ta = document.getElementById('mtext');
+  const raw = ta.value.trim(); if(!raw) return;
+  const {text, hit} = maskContacts(raw);
+  const c = store.chats[state.chatId];
+  c.messages.push({from:'me', text, time:now()});
+  c.updated = Date.now(); ta.value = '';
+  const warn = 'Контакты скрыты. Оплата вне Айвы не защищена: вернуть деньги при обмане будет невозможно.';
+  if(hit) c.messages.push({from:'sys', text:warn});
+  await save(); render();
+  await push(async () => {
+    await sbInsert('messages', {thread_id:c.threadId, sender_id:store.user.id, kind:'user', body:text});
+    if(hit) await sbInsert('messages', {thread_id:c.threadId, sender_id:store.user.id, kind:'system', body:warn});
+    await sbUpdate('threads', 'id=eq.' + encodeURIComponent(c.threadId), {updated_at:new Date().toISOString()});
+  });
+  if(REMOTE) return;
+  const n = c.messages.filter(m=>m.from==='them').length;
+  if(n < REPLIES.length) setTimeout(async () => {
+    c.messages.push({from:'them', text:REPLIES[n], time:now()}); c.updated = Date.now();
+    await save(); if(state.view==='chat') render();
+  }, 1400);
+}
+
+/* заявка */
+function viewOrder(){
+  const l = find(state.id);
+  if(!l) return `<div class="empty"><b>Проект не найден</b></div>`;
+  return `
+  <button class="back" data-open="${l.id}">Назад к проекту</button>
+  <div class="form">
+    <h1>Заказ проекта «${esc(l.title)}»</h1>
+    <p>Заявка создаёт сделку в вашем кабинете и уведомляет продавца. Оплата — следующим шагом, после того как договоритесь.</p>
+    <div class="calc">
+      <div class="line"><span>Цена проекта</span><b class="num">${money(l.price)}</b></div>
+      <div class="line"><span>Комиссия Айвы, удерживается с продавца</span><b class="num">−${money(l.price*FEE)}</b></div>
+      <div class="line tot"><span>К оплате</span><b class="num">${money(l.price)}</b></div>
+    </div>
+    <div class="field"><label for="omsg">Сообщение продавцу <span class="hint">необязательно</span></label>
+      <textarea id="omsg" placeholder="Готов купить, хочу посмотреть статистику за последние полгода."></textarea></div>
+    <button class="btn btn-primary btn-lg" id="sendOrder">Создать сделку</button>
+    <div class="shield" style="margin-top:14px">${shieldIcon()}<span>Продавец увидит только ваше имя. Контактами обмениваться не нужно — всё общение в чате Айвы.</span></div>
+  </div>`;
+}
+async function submitOrder(){
+  const l = find(state.id);
+  const id = 'СД-' + Math.floor(100000 + Math.random()*899999);
+  store.orders.unshift({id, listingId:l.id, title:l.title, price:l.price, buyer:store.user.name,
+    status:'Ожидает оплаты', date:today(), mine:true, sellerMine:false,
+    events:[{t:shortDate(), text:'Заявка отправлена продавцу'}]});
+  const msg = val('omsg');
+  if(!store.chats[l.id]) store.chats[l.id] = {listingId:l.id, title:l.title, seller:l.seller, price:l.price, messages:[], updated:Date.now()};
+  store.chats[l.id].messages.push({from:'sys', text:`Создана сделка ${id} на ${money(l.price)}.`});
+  if(msg){ const m = maskContacts(msg); store.chats[l.id].messages.push({from:'me', text:m.text, time:now()}); }
+  store.chats[l.id].updated = Date.now();
+  await save();
+  await push(async () => {
+    await sbInsert('orders', {id, listing_id:l.id, buyer_id:store.user.id, buyer_name:store.user.name,
+      seller_id:l.sellerId || null, title:l.title, price:l.price, status:'Ожидает оплаты'});
+    await sbInsert('order_events', {order_id:id, text:'Заявка отправлена продавцу'});
+    const tid = store.chats[l.id].threadId || (l.id + ':' + store.user.id);
+    store.chats[l.id].threadId = tid;
+    await sbInsert('threads', {id:tid, listing_id:l.id, buyer_id:store.user.id, title:l.title,
+      seller_name:l.seller, price:l.price}, 'resolution=merge-duplicates');
+    await sbInsert('messages', {thread_id:tid, sender_id:store.user.id, kind:'system', body:`Создана сделка ${id} на ${money(l.price)}.`});
+    if(msg) await sbInsert('messages', {thread_id:tid, sender_id:store.user.id, kind:'user', body:maskContacts(msg).text});
+  });
+  state.dealId = id; go('deal');
+}
+
+/* оплата */
+function viewPay(){
+  const o = order(state.dealId); if(!o) return `<div class="empty"><b>Сделка не найдена</b></div>`;
+  const M = [
+    ['sbp','Система быстрых платежей','Перевод по QR-коду, зачисление за минуту'],
+    ['card','Банковская карта','Мир, Visa, Mastercard'],
+    ['inv','Счёт для ИП или компании','Оплата по реквизитам, 1–2 рабочих дня']
+  ];
+  return `
+  <button class="back" data-deal="${o.id}">Назад к сделке</button>
+  <div class="pay">
+    <h1>Оплата сделки ${esc(o.id)}</h1>
+    <p>Деньги поступают на счёт Айвы и хранятся там, пока вы не примете проект.</p>
+    <div class="calc">
+      <div class="line"><span>Проект</span><b>${esc(o.title)}</b></div>
+      <div class="line"><span>Продавец получит после приёмки</span><b class="num">${money(o.price*(1-FEE))}</b></div>
+      <div class="line"><span>Комиссия Айвы 10%</span><b class="num">${money(o.price*FEE)}</b></div>
+      <div class="line tot"><span>К оплате сейчас</span><b class="num">${money(o.price)}</b></div>
+    </div>
+    <div id="methods">
+      ${M.map(m=>`<div class="method" role="radio" tabindex="0" data-m="${m[0]}" aria-checked="${state.method===m[0]}">
+        <span class="radio"></span><span><b>${m[1]}</b><span>${m[2]}</span></span></div>`).join('')}
+    </div>
+    <div id="payArea" style="margin-top:20px">
+      <button class="btn btn-primary btn-lg" id="payGo">Оплатить ${money(o.price)}</button>
+      <div class="shield" style="margin-top:14px">${shieldIcon()}<span>Если продавец не передаст доступы, деньги вернутся вам полностью. Комиссия удерживается только с закрытой сделки.</span></div>
+    </div>
+  </div>`;
+}
+async function pay(){
+  const o = order(state.dealId);
+  document.getElementById('payArea').innerHTML = `<div class="paying"><span class="spin"></span>Проводим платёж…</div>`;
+  await new Promise(r => setTimeout(r, 1500));
+  o.status = 'Оплачена';
+  const ev = `Оплата ${money(o.price)}, деньги на счёте Айвы`;
+  o.events.push({t:shortDate(), text:ev});
+  await save(); go('deal'); toast('Оплата прошла, деньги на счёте Айвы');
+  const c = store.chats[o.listingId];
+  if(c){ c.messages.push({from:'sys', text:`Покупатель оплатил сделку ${o.id}. Передайте доступы через Айву.`}); c.updated = Date.now(); }
+  await push(async () => {
+    await sbUpdate('orders', 'id=eq.' + encodeURIComponent(o.id), {status:'Оплачена'});
+    await sbInsert('order_events', {order_id:o.id, text:ev});
+  });
+  if(REMOTE) return;
+  setTimeout(async () => {
+    if(o.status !== 'Оплачена') return;
+    o.status = 'Доступы переданы';
+    o.events.push({t:shortDate(), text:'Продавец передал доступы'});
+    if(c) c.messages.push({from:'them', text:'Отправил доступы и репозиторий. Проверьте, что всё открывается.', time:now()});
+    await save(); if(state.view==='deal') render();
+    toast('Продавец передал доступы — проверьте и примите проект');
+  }, 5000);
+}
+
+/* сделка */
+function viewDeal(){
+  const o = order(state.dealId); if(!o) return `<div class="empty"><b>Сделка не найдена</b></div>`;
+  const asSeller = !!o.sellerMine && !o.mine;
+  const step = STATUS_STEP[o.status];
+  const cls = i => o.status==='Отменена' ? '' : (i < step ? 'done' : i === step ? 'now' : '');
+  const wait = t => `<div class="note" style="font-size:13.5px;color:var(--muted)">${t}</div>`;
+  let actions = '';
+  if(asSeller){
+    if(o.status === 'Ожидает оплаты') actions = wait('Покупатель ещё не оплатил. Доступы передавать рано — ответьте на вопросы в чате.');
+    else if(o.status === 'Оплачена') actions = `
+      <button class="btn btn-primary btn-lg" data-handover="${o.id}">Отметить передачу доступов</button>
+      ${wait('Деньги покупателя уже на счёте Айвы. Передайте доступы и отметьте это здесь.')}`;
+    else if(o.status === 'Доступы переданы') actions = wait('Ждём, пока покупатель проверит доступы и примет проект. После этого выплата уходит вам.');
+    else if(o.status === 'Завершена') actions = `<div class="shield">${shieldIcon()}<span>Сделка закрыта. Вам переведено ${money(o.price*(1-FEE))}, комиссия Айвы — ${money(o.price*FEE)}.</span></div>`;
+    else if(o.status === 'Спор') actions = wait('Покупатель открыл спор. Опишите свою сторону в чате, Айва разберётся.');
+    else actions = wait('Сделка отменена.');
+  }
+  else if(o.status === 'Ожидает оплаты') actions = `
+    <button class="btn btn-primary btn-lg" data-pay="${o.id}">Перейти к оплате</button>
+    <button class="btn btn-lg btn-bad" data-cancel="${o.id}">Отменить сделку</button>`;
+  else if(o.status === 'Оплачена') actions = wait('Деньги на счёте Айвы. Ждём, когда продавец передаст доступы.');
+  else if(o.status === 'Доступы переданы') actions = `
+    <button class="btn btn-primary btn-lg" data-accept="${o.id}">Принять проект и закрыть сделку</button>
+    <button class="btn btn-lg btn-bad" data-dispute="${o.id}">Что-то не так, открыть спор</button>`;
+  else if(o.status === 'Завершена') actions = `<div class="shield">${shieldIcon()}<span>Сделка закрыта. Продавец получил ${money(o.price*(1-FEE))}, комиссия Айвы — ${money(o.price*FEE)}.</span></div>`;
+  else if(o.status === 'Спор') actions = wait('Спор открыт, деньги заморожены. Айва разбирается и вернётся к вам в чате.');
+  else actions = wait('Сделка отменена, деньги не списывались.');
+
+  return `
+  <button class="back" data-back-cab="${asSeller?'sales':'deals'}">Назад в кабинет</button>
+  <div class="deal-page">
+    <div class="deal-head">
+      <div>
+        <span class="tag ${o.status==='Завершена'?'tag-ok':o.status==='Отменена'||o.status==='Спор'?'tag-bad':'tag-wait'}">${esc(o.status)}</span>
+        <h1>${esc(o.title)}</h1>
+        <div class="sub">Сделка ${esc(o.id)}, создана ${esc(o.date)}${asSeller?`, покупатель ${esc(o.buyer)}`:''}</div>
+      </div>
+      <div class="price num" style="font-size:26px">${money(o.price)}</div>
+    </div>
+    <div class="track">${FLOW.map((f,i)=>`<div class="step ${cls(i)}"><b>${f}</b></div>`).join('')}</div>
+    <div class="cols">
+      <div>
+        <div class="sec"><h3>История сделки</h3>
+          <div class="tl">${o.events.map(e=>`<div><span>${esc(e.text)}</span><time>${esc(e.t)}</time></div>`).join('')}</div>
+        </div>
+      </div>
+      <aside class="panel">
+        <div class="line"><span>Цена</span><b class="num">${money(o.price)}</b></div>
+        <div class="line"><span>Комиссия Айвы</span><b class="num">${money(o.price*FEE)}</b></div>
+        <div class="line"><span>${asSeller?'Вы получите':'Продавцу'}</span><b class="num">${money(o.price*(1-FEE))}</b></div>
+        <hr>
+        <div class="stack">${actions}
+          <button class="btn btn-lg" data-chat="${o.listingId}">Открыть чат</button>
+        </div>
+      </aside>
+    </div>
+  </div>`;
+}
+async function act(id, kind){
+  const o = order(id);
+  if(kind==='cancel'){ o.status='Отменена'; o.events.push({t:shortDate(),text:'Покупатель отменил сделку'}); }
+  if(kind==='accept'){ o.status='Завершена'; o.events.push({t:shortDate(),text:`Покупатель принял проект, продавцу переведено ${money(o.price*(1-FEE))}`}); }
+  if(kind==='handover'){ o.status='Доступы переданы'; o.events.push({t:shortDate(),text:'Продавец отметил передачу доступов'}); }
+  if(kind==='dispute'){ o.status='Спор'; o.events.push({t:shortDate(),text:'Открыт спор, деньги заморожены'}); }
+  await save(); render();
+  if(kind==='handover'){
+    const c = store.chats[o.listingId];
+    if(c){ c.messages.push({from:'sys', text:'Продавец передал доступы. Проверьте их и примите проект — после этого деньги уйдут продавцу.'}); c.updated = Date.now(); await save(); }
+    await push(() => sbInsert('messages', {thread_id:(c&&c.threadId)||(o.listingId+':'+store.user.id), sender_id:store.user.id,
+      kind:'system', body:'Продавец передал доступы.'}));
+  }
+  await push(async () => {
+    await sbUpdate('orders', 'id=eq.' + encodeURIComponent(o.id), {status:o.status});
+    await sbInsert('order_events', {order_id:o.id, text:o.events[o.events.length-1].text});
+  });
+  toast(kind==='accept'?'Сделка закрыта, деньги ушли продавцу'
+      :kind==='cancel'?'Сделка отменена'
+      :kind==='handover'?'Отмечено: доступы переданы покупателю'
+      :'Спор открыт, мы разберёмся');
+}
+
+/* продавец */
+function viewSell(){
+  return `
+  <button class="back" data-go="catalog">Назад в каталог</button>
+  <div class="form">
+    <h1>Выставить проект на продажу</h1>
+    <p>Карточка появится в каталоге после проверки. Размещение бесплатное, 10% удерживаются только с состоявшейся сделки.</p>
+    <div class="field"><label for="pname">Название проекта</label><input id="pname" placeholder="Запись24"><div class="err">Заполните поле</div></div>
+    <div class="field"><label for="ptag">Одна строка о проекте</label><input id="ptag" placeholder="Бот онлайн-записи для мастеров маникюра"><div class="err">Заполните поле</div></div>
+    <div class="field"><label for="pcat">Категория</label><select id="pcat">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="two">
+      <div class="field"><label for="pmrr">Выручка в месяц, ₽ <span class="hint">0, если нет</span></label><input id="pmrr" inputmode="numeric" placeholder="41000"></div>
+      <div class="field"><label for="pusers">Аудитория</label><input id="pusers" placeholder="620 мастеров"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="page">Возраст проекта</label><input id="page" placeholder="2 года"></div>
+      <div class="field"><label for="pstack">На чём сделано</label><input id="pstack" placeholder="Python, aiogram"></div>
+    </div>
+    <div class="field"><label for="pdesc">Описание</label>
+      <textarea id="pdesc" placeholder="Как проект зарабатывает, откуда приходят пользователи, что уже сделано."></textarea>
+      <div class="err">Расскажите о проекте хотя бы пару предложений</div></div>
+    <div class="field">
+      <label>Скриншоты <span class="hint">до ${SHOT_MAX} штук, png, jpg или webp</span></label>
+      <input id="pshots" type="file" accept="image/png,image/jpeg,image/webp" multiple style="display:none">
+      <div class="drop" id="pdrop" role="button" tabindex="0">
+        <b>Перетащите файлы сюда</b>
+        <span>или нажмите, чтобы выбрать. Первый снимок станет обложкой карточки.</span>
+      </div>
+      <div class="shots" id="pshotsGrid"></div>
+    </div>
+    <div class="field"><label for="pwhy">Почему продаёте <span class="hint">необязательно</span></label><input id="pwhy" placeholder="Не хватает времени на поддержку"></div>
+    <div class="field"><label for="pprice">Цена, ₽</label><input id="pprice" inputmode="numeric" placeholder="320000"><div class="err">Укажите цену числом</div></div>
+    <div class="calc">
+      <div class="line"><span>Цена в каталоге</span><b class="num" id="cPrice">0 ₽</b></div>
+      <div class="line"><span>Комиссия Айвы 10%</span><b class="num" id="cFee">0 ₽</b></div>
+      <div class="line tot"><span>Вы получите после приёмки</span><b class="num" id="cNet">0 ₽</b></div>
+    </div>
+    <button class="btn btn-primary btn-lg" id="sendListing">Отправить на проверку</button>
+    <div class="shield" style="margin-top:14px">${shieldIcon()}<span>Контакты в карточке публиковать нельзя — покупатели напишут вам в чат Айвы.</span></div>
+  </div>`;
+}
+async function submitListing(){
+  let err = false;
+  err = bad('pname', !val('pname')) || err;
+  err = bad('ptag', !val('ptag')) || err;
+  err = bad('pdesc', val('pdesc').length < 20) || err;
+  err = bad('pprice', num(val('pprice')) < 1000) || err;
+  if(err){ app.querySelector('.field.bad input, .field.bad textarea').focus(); return; }
+  const d = maskContacts(val('pdesc')), t = maskContacts(val('ptag'));
+  const id = 'OB-' + Math.floor(1000 + Math.random()*8999);
+  const btn = document.getElementById('sendListing');
+  btn.disabled = true;
+  btn.textContent = sellShots.length ? 'Загружаем скриншоты…' : 'Отправляем…';
+  const shots = await uploadShots(id);
+  store.listings.unshift({id, mine:true, status:'На проверке', title:val('pname'), tagline:t.text, cat:val('pcat'),
+    price:num(val('pprice')), mrr:num(val('pmrr')), users:val('pusers'), age:val('page'), stack:val('pstack'),
+    desc:d.text, why:val('pwhy'), includes:[], shots, seller:store.user.name, deals:'первая продажа', reply:'обычно за день', date:today()});
+  await save();
+  await push(() => sbInsert('listings', {id, seller_id:store.user.id, seller_name:store.user.name,
+    title:val('pname'), tagline:t.text, cat:val('pcat'), price:num(val('pprice')), mrr:num(val('pmrr')),
+    users_text:val('pusers'), age_text:val('page'), stack:val('pstack'), description:d.text,
+    why:val('pwhy'), shots, status:'На проверке'}));
+  sellShots = [];
+  state.tab='listings'; go('cabinet');
+  toast(d.hit||t.hit ? 'Объявление отправлено, контакты в тексте скрыты' : 'Объявление отправлено на проверку');
+}
+
+/* кабинет */
+function viewCabinet(){
+  const my = store.orders.filter(o => o.mine);
+  const sales = store.orders.filter(o => o.sellerMine && !o.mine);
+  const chats = Object.values(store.chats).sort((a,b)=>b.updated-a.updated);
+  const mine = store.listings.filter(l => l.mine);
+  const tab = state.tab;
+  const needMe = sales.filter(o => o.status === 'Оплачена').length;
+  const body = {
+    deals: my.length ? my.map(o=>`
+      <button class="item" data-deal="${o.id}">
+        <span><span class="item-t">${esc(o.title)} <span class="tag ${o.status==='Завершена'?'tag-ok':o.status==='Отменена'||o.status==='Спор'?'tag-bad':'tag-wait'}">${esc(o.status)}</span></span>
+        <span class="item-m">${esc(o.id)}, ${esc(o.date)}</span></span>
+        <span class="price num">${money(o.price)}<small>${o.status==='Ожидает оплаты'?'нужна оплата':o.status==='Доступы переданы'?'примите проект':'—'}</small></span>
+      </button>`).join('')
+      : `<div class="empty"><b>Пока нет сделок</b>Найдите проект в каталоге и оформите заказ.</div>`,
+    sales: sales.length ? sales.map(o=>`
+      <button class="item" data-deal="${o.id}">
+        <span><span class="item-t">${esc(o.title)} <span class="tag ${o.status==='Завершена'?'tag-ok':o.status==='Отменена'||o.status==='Спор'?'tag-bad':'tag-wait'}">${esc(o.status)}</span></span>
+        <span class="item-m">покупатель ${esc(o.buyer)}, ${esc(o.id)} от ${esc(o.date)}</span></span>
+        <span class="price num">${money(o.price*(1-FEE))}<small>${o.status==='Оплачена'?'передайте доступы':o.status==='Ожидает оплаты'?'ждём оплату':o.status==='Доступы переданы'?'ждём приёмку':o.status==='Завершена'?'выплачено':'—'}</small></span>
+      </button>`).join('')
+      : `<div class="empty"><b>Входящих заявок нет</b>Заявки на ваши проекты появятся здесь, как только покупатель оформит заказ.</div>`,
+    chats: chats.length ? chats.map(c=>{
+      const last = [...c.messages].reverse().find(m=>m.from!=='sys');
+      return `<button class="item" data-chat="${c.listingId}">
+        <span><span class="item-t">${esc(c.seller)} — ${esc(c.title)}</span>
+        <span class="item-m">${last?(last.from==='me'?'вы: ':'')+esc(last.text.slice(0,66)):'переписка не начата'}</span></span>
+        <span class="item-m">${last?esc(last.time||''):''}</span></button>`; }).join('')
+      : `<div class="empty"><b>Переписки нет</b>Откройте проект и нажмите «Написать продавцу».</div>`,
+    listings: mine.length ? mine.map(l=>`
+      <div class="item"><span><span class="item-t">${esc(l.title)} <span class="tag ${l.status==='Опубликовано'?'tag-ok':l.status==='Отклонено'?'tag-bad':'tag-wait'}">${esc(l.status)}</span></span>
+      <span class="item-m">${l.status==='Опубликовано'?'в каталоге':'проверяем карточку'}, на руки ${money(l.price*(1-FEE))}${(l.shots||[]).length?`, ${l.shots.length} ${plural(l.shots.length,'скриншот','скриншота','скриншотов')}`:', без скриншотов'}</span></span>
+      <span class="price num">${money(l.price)}<small>комиссия ${money(l.price*FEE)}</small></span></div>`).join('')
+      : `<div class="empty"><b>Вы ещё ничего не продаёте</b>Размещение бесплатное.
+         <div style="margin-top:16px"><button class="btn btn-primary" data-go="sell">Выставить проект</button></div></div>`,
+    profile: `<div style="max-width:420px;padding-top:8px">
+        <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>Имя</span><b>${esc(store.user.name)}</b></div>
+        <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>Почта</span><b>${esc(store.user.email || '—')}</b></div>
+        <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>Способ входа</span><b>${store.user.provider==='yandex'?'Яндекс ID':'почта и пароль'}</b></div>
+        <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>В Айве с</span><b>${esc(store.user.since)}</b></div>
+        <div class="shield" style="margin-top:16px">${shieldIcon()}<span>Почту не видят другие участники: продавцы и покупатели общаются только в чате Айвы.</span></div>
+        <button class="btn" id="logout" style="margin-top:20px">Выйти</button></div>`
+  }[tab];
+  return `<div class="cab"><h1>Кабинет</h1>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="deals" aria-selected="${tab==='deals'}">Покупки${my.length?`<span class="dot">${my.length}</span>`:''}</button>
+      <button class="tab" role="tab" data-tab="sales" aria-selected="${tab==='sales'}">Продажи${sales.length?`<span class="dot"${needMe?' style="background:var(--quince-soft);color:#8A6A12"':''}>${needMe||sales.length}</span>`:''}</button>
+      <button class="tab" role="tab" data-tab="chats" aria-selected="${tab==='chats'}">Чаты${chats.length?`<span class="dot">${chats.length}</span>`:''}</button>
+      <button class="tab" role="tab" data-tab="listings" aria-selected="${tab==='listings'}">Объявления${mine.length?`<span class="dot">${mine.length}</span>`:''}</button>
+      <button class="tab" role="tab" data-tab="profile" aria-selected="${tab==='profile'}">Профиль</button>
+    </div>${body}</div>`;
+}
+
+/* панель владельца */
+function viewAdmin(){
+  const o = store.orders;
+  const done = o.filter(x=>x.status==='Завершена');
+  const held = o.filter(x=>['Оплачена','Доступы переданы','Спор'].includes(x.status));
+  const wait = o.filter(x=>x.status==='Ожидает оплаты');
+  const gmv = done.reduce((s,x)=>s+x.price,0);
+  const fee = gmv*FEE;
+  const escrow = held.reduce((s,x)=>s+x.price,0);
+  const payout = held.reduce((s,x)=>s+x.price*(1-FEE),0);
+  const avg = done.length ? gmv/done.length : 0;
+  const conv = o.length ? Math.round(done.length/o.length*100) : 0;
+  const mod = store.listings.filter(l=>l.status==='На проверке');
+  const chats = Object.values(store.chats);
+
+  return `
+  <div class="admin">
+    <button class="back" data-go="catalog">Назад в каталог</button>
+    <h1>Панель владельца</h1>
+    <p class="sub">Деньги, заявки и модерация.</p>
+    <div class="kpis">
+      <div class="kpi hi"><b class="num">${money(fee)}</b><span>заработано комиссии</span><i>${done.length} ${plural(done.length,'закрытая сделка','закрытых сделки','закрытых сделок')}</i></div>
+      <div class="kpi"><b class="num">${money(escrow)}</b><span>на эскроу-счёте</span><i>к выплате продавцам ${money(payout)}</i></div>
+      <div class="kpi"><b class="num">${money(gmv)}</b><span>оборот</span><i>средний чек ${money(avg)}</i></div>
+      <div class="kpi"><b class="num">${wait.length}</b><span>ждут оплаты</span><i>доходит до сделки ${conv}%</i></div>
+    </div>
+
+    <h3>Заявки и сделки</h3>
+    <div class="tbl">
+      <div class="tr th"><span>Номер</span><span>Проект</span><span>Покупатель</span><span>Сумма</span><span>Комиссия</span><span>Статус</span></div>
+      ${o.map(x=>`<div class="tr">
+        <span class="cell num sm">${esc(x.id)}<br><span class="sm">${esc(x.date)}</span></span>
+        <span class="cell" data-l="Проект:"><b>${esc(x.title)}</b></span>
+        <span class="cell" data-l="Покупатель:">${esc(x.buyer)}</span>
+        <span class="cell num" data-l="Сумма:">${money(x.price)}</span>
+        <span class="cell num" data-l="Комиссия:">${x.status==='Завершена'?money(x.price*FEE):'—'}</span>
+        <span class="cell" data-l="Статус:"><select data-status="${x.id}">${ADMIN_STATUSES.map(s=>`<option${s===x.status?' selected':''}>${s}</option>`).join('')}</select></span>
+      </div>`).join('')}
+    </div>
+
+    <h3>Объявления на проверке</h3>
+    ${mod.length ? mod.map(l=>`<div class="modrow">
+      <div style="min-width:0"><div class="item-t">${esc(l.title)} <span class="tag">${esc(l.cat)}</span></div>
+      <div class="item-m">${esc(l.tagline)}</div>
+      <div class="item-m" style="margin-top:6px">${money(l.price)}, продавец ${esc(l.seller)}${l.mrr>0?`, выручка ${money(l.mrr)} в месяц`:', без выручки'}</div>
+      ${(l.shots||[]).length?`<div class="minis">${l.shots.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div>`:''}</div>
+      <div class="acts"><button class="btn btn-sm btn-primary" data-approve="${l.id}">Опубликовать</button>
+      <button class="btn btn-sm" data-reject="${l.id}">Отклонить</button></div></div>`).join('')
+      : `<div class="empty" style="padding:24px 4px">Новых объявлений нет.</div>`}
+
+    <h3 style="margin-top:30px">Переписки</h3>
+    ${chats.length ? chats.map(c=>`<div class="modrow">
+      <div><div class="item-t">${esc(c.seller)} — ${esc(c.title)}</div>
+      <div class="item-m">${c.messages.filter(m=>m.from!=='sys').length} ${plural(c.messages.filter(m=>m.from!=='sys').length,'сообщение','сообщения','сообщений')}${c.messages.some(m=>m.text.includes('[контакт скрыт]'))?', есть скрытые контакты':''}</div></div>
+      <button class="btn btn-sm" data-chat="${c.listingId}">Открыть</button></div>`).join('')
+      : `<div class="empty" style="padding:24px 4px">Переписок пока нет.</div>`}
+  </div>`;
+}
+
+/* рендер */
+function render(){
+  const v = {catalog:viewCatalog, listing:viewListing, order:viewOrder, sell:viewSell, pay:viewPay,
+             deal:viewDeal, cabinet:viewCabinet, chat:viewChat, admin:viewAdmin}[state.view];
+  app.className = state.view === 'admin' ? 'wrap wide' : 'wrap';
+  try{
+    app.innerHTML = v(); bind();
+  }catch(e){
+    console.error(e);
+    app.innerHTML = `<div class="empty"><b>Страница не открылась</b>${esc(e.message)}. Обновите вкладку — если повторится, откройте консоль браузера.</div>`;
+  }
+  const m = document.getElementById('msgs'); if(m) m.scrollTop = m.scrollHeight;
+}
+function bind(){
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>go('listing', b.dataset.open));
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.go==='sell') return requireAuth('Чтобы выставить проект, представьтесь.', ()=>go('sell'));
+    go(b.dataset.go);
+  });
+  app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ state.cat=b.dataset.cat; render(); });
+  app.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{ const k=b.dataset.quick; state.quick[k]=!state.quick[k]; render(); });
+  app.querySelectorAll('[data-qf]').forEach(b=>b.onclick=()=>{ state.qf[b.dataset.qf] = !state.qf[b.dataset.qf]; render(); });
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ state.tab=b.dataset.tab; render(); });
+  app.querySelectorAll('[data-back-cab]').forEach(b=>b.onclick=()=>{ state.tab=b.dataset.backCab; go('cabinet'); });
+  app.querySelectorAll('[data-deal]').forEach(b=>b.onclick=()=>{ state.dealId=b.dataset.deal; go('deal'); });
+  app.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>{ state.dealId=b.dataset.pay; go('pay'); });
+  app.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>act(b.dataset.cancel,'cancel'));
+  app.querySelectorAll('[data-accept]').forEach(b=>b.onclick=()=>act(b.dataset.accept,'accept'));
+  app.querySelectorAll('[data-dispute]').forEach(b=>b.onclick=()=>act(b.dataset.dispute,'dispute'));
+  app.querySelectorAll('[data-handover]').forEach(b=>b.onclick=()=>act(b.dataset.handover,'handover'));
+  app.querySelectorAll('[data-order]').forEach(b=>{ const id=b.dataset.order;
+    b.onclick=()=>requireAuth('Чтобы оформить заказ, войдите — сделка сохранится в кабинете.', ()=>go('order', id)); });
+  app.querySelectorAll('[data-chat]').forEach(b=>{ const id=b.dataset.chat;
+    b.onclick=()=>requireAuth('Чтобы написать продавцу, представьтесь.', ()=>openChat(id)); });
+  app.querySelectorAll('[data-m]').forEach(el=>{
+    const pick=()=>{ state.method=el.dataset.m; render(); };
+    el.onclick=pick; el.onkeydown=e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); pick(); } };
+  });
+
+  app.querySelectorAll('[data-shot]').forEach(b=>b.onclick=()=>openShot(b.dataset.shot));
+  const fi=document.getElementById('pshots'), dz=document.getElementById('pdrop');
+  if(fi && dz){
+    dz.onclick=()=>fi.click();
+    dz.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fi.click(); } };
+    fi.onchange=e=>{ addShots(e.target.files); fi.value=''; };
+    ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.add('over'); }));
+    ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.remove('over'); }));
+    dz.addEventListener('drop', e => addShots(e.dataTransfer.files));
+    renderShots();
+  }
+
+  const q=document.getElementById('q');
+  if(q) q.oninput=debounce(e=>{ state.q=e.target.value; render(); const el=document.getElementById('q'); el.focus(); el.setSelectionRange(el.value.length,el.value.length); },220);
+  const s=document.getElementById('sort'); if(s) s.onchange=e=>{ state.sort=e.target.value; render(); };
+  const p=document.getElementById('pprice'); if(p) p.oninput=calc;
+  const so=document.getElementById('sendOrder'); if(so) so.onclick=submitOrder;
+  const sl=document.getElementById('sendListing'); if(sl) sl.onclick=submitListing;
+  const pg=document.getElementById('payGo'); if(pg) pg.onclick=pay;
+  const ms=document.getElementById('msend'); if(ms) ms.onclick=sendMsg;
+  const mt=document.getElementById('mtext'); if(mt) mt.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } };
+  const lo=document.getElementById('logout'); if(lo) lo.onclick=async()=>{
+    await push(() => sbFetch('/auth/v1/logout', {method:'POST'}));
+    session=null; store.user=null; store.session=null;
+    if(REMOTE){ store.listings=[]; store.orders=[]; store.chats={}; }
+    await save(); renderNav(); go('catalog'); toast('Вы вышли');
+  };
+
+  app.querySelectorAll('[data-status]').forEach(sel=>sel.onchange=async e=>{
+    const o=order(sel.dataset.status); o.status=e.target.value;
+    const text = `Статус изменён владельцем: ${o.status}`;
+    o.events.push({t:shortDate(), text});
+    await save(); render(); toast(`${o.id}: ${o.status}`);
+    await push(async () => {
+      await sbUpdate('orders', 'id=eq.' + encodeURIComponent(o.id), {status:o.status});
+      await sbInsert('order_events', {order_id:o.id, text});
+    });
+  });
+  app.querySelectorAll('[data-approve]').forEach(b=>b.onclick=async()=>{
+    const l = store.listings.find(x=>x.id===b.dataset.approve);
+    l.status='Опубликовано'; await save(); render(); toast('Объявление в каталоге');
+    await push(() => sbUpdate('listings', 'id=eq.' + encodeURIComponent(l.id), {status:'Опубликовано'}));
+  });
+  app.querySelectorAll('[data-reject]').forEach(b=>b.onclick=async()=>{
+    const l = store.listings.find(x=>x.id===b.dataset.reject);
+    l.status='Отклонено'; await save(); render(); toast('Объявление отклонено');
+    await push(() => sbUpdate('listings', 'id=eq.' + encodeURIComponent(l.id), {status:'Отклонено'}));
+  });
+}
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+function calc(){
+  const p=num(document.getElementById('pprice').value);
+  document.getElementById('cPrice').textContent=money(p);
+  document.getElementById('cFee').textContent='−'+money(p*FEE);
+  document.getElementById('cNet').textContent=money(p*(1-FEE));
+}
+const num=v=>Math.max(0,parseInt(String(v).replace(/\D/g,''),10)||0);
+const val=id=>document.getElementById(id).value.trim();
+function bad(id,on){ document.getElementById(id).closest('.field').classList.toggle('bad',on); return on; }
+
+document.getElementById('logo').onclick=()=>go('catalog');
+document.getElementById('adminLink').onclick=()=>go('admin');
+load().then(()=>{ renderNav(); render(); if(oauthNote) toast(oauthNote); });
+</script>
+</body>
+</html>
