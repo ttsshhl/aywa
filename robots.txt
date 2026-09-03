@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ayva.ru/sitemap.xml
+Sitemap: https://aywamarket.ru/sitemap.xml
