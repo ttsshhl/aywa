@@ -491,14 +491,17 @@ async function consumeOAuth(){
   const err = dec(h.get('ya_error') || h.get('error_description'));
   if(!token && !direct && !err) return false;
   if(direct){
+    let done = false;
     try{
       await setSession({access_token:direct, refresh_token:h.get('refresh_token')});
       oauthNote = 'Вы вошли через Яндекс ID';
       await restoreIntent();
-    }catch(e){ oauthNote = 'Не удалось завершить вход: ' + e.message; }
+      done = true;
+    }catch(e){ console.error(e); }   // токен мог быть уже использован — не беда
     history.replaceState(null, '', location.pathname);
-    return true;
+    return done;                     // не вышло — ниже восстановим прежнюю сессию
   }
+  let ok = false;
   if(token){
     try{
       // GoTrue сверяет тип токена: ссылка выдана как magiclink, но на части
@@ -513,12 +516,13 @@ async function consumeOAuth(){
       await setSession(d);
       oauthNote = 'Вы вошли через Яндекс ID';
       await restoreIntent();
+      ok = true;
     }catch(e){ oauthNote = 'Не удалось завершить вход: ' + e.message; }
   } else {
     oauthNote = 'Вход через Яндекс не завершён: ' + err;
   }
   history.replaceState(null, '', location.pathname);
-  return !!token;
+  return ok;
 }
 
 async function sbRestore(){
@@ -1626,6 +1630,12 @@ function bad(id,on){ document.getElementById(id).closest('.field').classList.tog
 
 document.getElementById('logo').onclick=()=>go('catalog');
 window.addEventListener('hashchange', () => { if(location.hash === '#owner') openOwner(); });
+/* «Назад» может вернуть страницу из кеша браузера — приводим её в чувство */
+window.addEventListener('pageshow', e => {
+  if(!e.persisted) return;
+  const m = document.getElementById('modal'); if(m) m.innerHTML = '';
+  renderNav(); render();
+});
 load().then(()=>{
   renderNav();
   if(location.hash === '#owner') openOwner(); else render();
