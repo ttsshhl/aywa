@@ -20,6 +20,7 @@
   --ink:#121412; --muted:#5E635E; --faint:#767B76; --line:#E6E4DA; --line2:#D2CFC3;
   --shadow:0 16px 32px -24px rgba(20,24,20,.55);
   --quince:#177346; --quince-dk:#0F5733; --quince-soft:#E6F1EA;
+  --gold-btn:#C9922A; --gold-btn-dk:#AE7C18; --gold-soft:#FBF1DC; --on-gold:#1A1508;
   --gold:#8F6A12; --bad:#A03A28; --bad-soft:#F7EAE6;
   --ui:'Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   --disp:'Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -51,8 +52,8 @@ header{border-bottom:1px solid var(--line);background:rgba(245,244,239,.86);back
 
 .btn{border:1px solid var(--line2);background:var(--card);padding:9px 15px;border-radius:8px;font-size:13.5px;font-weight:500;letter-spacing:-0.01em;transition:border-color .15s,background .15s,color .15s}
 .btn:hover{border-color:var(--ink)}
-.btn-primary{background:var(--quince);border-color:var(--quince);color:#fff}
-.btn-primary:hover{background:var(--quince-dk);border-color:var(--quince-dk)}
+.btn-primary{background:var(--gold-btn);border-color:var(--gold-btn);color:var(--on-gold);font-weight:600}
+.btn-primary:hover{background:var(--gold-btn-dk);border-color:var(--gold-btn-dk)}
 .btn-lg{padding:13px 20px;font-size:15px;width:100%}
 .btn-ghost{border-color:transparent;background:none;color:var(--muted)}
 .btn-ghost:hover{color:var(--ink);background:var(--tint2);border-color:transparent}
@@ -256,8 +257,8 @@ button.item:hover{background:var(--card);box-shadow:0 1px 0 var(--line)}
 .modal{background:var(--card);border:1px solid var(--line);border-radius:14px;width:100%;max-width:396px;padding:26px 24px 22px}
 .modal h2{margin:0 0 6px;font-size:21px;font-weight:600;letter-spacing:-0.03em}
 .modal>p{margin:0 0 22px;color:var(--muted);font-size:14px}
-.btn-ya{background:#FC3F1D;border-color:#FC3F1D;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px}
-.btn-ya:hover{background:#E5350F;border-color:#E5350F}
+.btn-ya{background:var(--ink);border-color:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-ya:hover{background:#2A2E2A;border-color:#2A2E2A}
 .btn-ya svg{flex:none}
 .btn-ya[disabled]{opacity:.55}
 .divider{display:flex;align-items:center;gap:12px;margin:16px 0 18px;color:var(--faint);font-size:12px;white-space:nowrap}
@@ -470,12 +471,13 @@ async function yandexLogin(){
   location.href = yandexUrl();
 }
 /* после входа возвращаем человека туда, куда он шёл */
+let intentUsed = false;    // после входа вернули человека на прежний экран
 async function restoreIntent(){
   try{
     const r = await window.storage.get('ayva:intent');
     if(r && r.value){
       const i = JSON.parse(r.value);
-      if(i.view && i.view !== 'catalog'){ state.view = i.view; if(i.id) state.id = i.id; }
+      if(i.view && i.view !== 'catalog'){ state.view = i.view; if(i.id) state.id = i.id; intentUsed = true; }
     }
     await window.storage.delete('ayva:intent');
   }catch(e){}
@@ -788,7 +790,40 @@ async function load(){
 }
 async function save(){ try{ await window.storage.set('ayva:data', JSON.stringify(store)); }catch(e){ console.error(e); } }
 
-function go(view, id){ if(view === 'sell') sellShots = []; state.view = view; if(id) state.id = id; window.scrollTo(0,0); render(); }
+/* адрес страницы для текущего экрана — по нему работают «Назад» и «Вперёд» */
+function hashFor(view){
+  if(view === 'listing' && state.id) return '#/p/' + encodeURIComponent(state.id);
+  if(view === 'deal'    && state.dealId) return '#/deal/' + encodeURIComponent(state.dealId);
+  if(view === 'pay'     && state.dealId) return '#/pay/' + encodeURIComponent(state.dealId);
+  if(view === 'chat'    && state.chatId) return '#/chat/' + encodeURIComponent(state.chatId);
+  if(view === 'cabinet') return '#/cabinet';
+  if(view === 'sell')    return '#/sell';
+  if(view === 'admin')   return '#owner';
+  return '#/';
+}
+function applyHash(){
+  const h = decodeURIComponent(location.hash || '');
+  if(h === '#owner'){ state.view = 'admin'; return; }
+  const m = /^#\/(p|deal|pay|chat)\/(.+)$/.exec(h);
+  if(m){
+    const [, kind, id] = m;
+    if(kind === 'p'){ state.view = 'listing'; state.id = id; }
+    if(kind === 'deal'){ state.view = 'deal'; state.dealId = id; }
+    if(kind === 'pay'){ state.view = 'pay'; state.dealId = id; }
+    if(kind === 'chat'){ state.view = 'chat'; state.chatId = id; }
+    return;
+  }
+  if(h === '#/cabinet'){ state.view = 'cabinet'; return; }
+  if(h === '#/sell'){ state.view = 'sell'; return; }
+  state.view = 'catalog';
+}
+function go(view, id){
+  if(view === 'sell') sellShots = [];
+  state.view = view; if(id) state.id = id;
+  const h = hashFor(view);
+  if(h !== location.hash) history.pushState({view}, '', h);
+  window.scrollTo(0,0); render();
+}
 function toast(t){
   const el = document.getElementById('toast');
   el.innerHTML = `<div class="toast">${esc(t)}</div>`;
@@ -865,9 +900,9 @@ function openAuth(reason){
 function renderNav(){
   const nav = document.getElementById('nav');
   nav.innerHTML = store.user
-    ? `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nSell">Стать продавцом</button>
+    ? `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nSell">Продать проект</button>
        <button class="who" id="nCab"><span class="ava">${esc(store.user.name.trim()[0]||'·')}</span>Кабинет</button>`
-    : `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nCab">Кабинет</button><button class="btn btn-primary" id="nSell">Стать продавцом</button>`;
+    : `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nCab">Кабинет</button><button class="btn btn-primary" id="nSell">Продать проект</button>`;
   nav.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => go('catalog'));
   document.getElementById('nSell').onclick = () => requireAuth('Чтобы выставить проект на продажу, представьтесь.', () => go('sell'));
   document.getElementById('nCab').onclick = () => requireAuth('В кабинете лежат ваши сделки и переписка.', () => go('cabinet'));
@@ -1629,7 +1664,13 @@ const val=id=>document.getElementById(id).value.trim();
 function bad(id,on){ document.getElementById(id).closest('.field').classList.toggle('bad',on); return on; }
 
 document.getElementById('logo').onclick=()=>go('catalog');
-window.addEventListener('hashchange', () => { if(location.hash === '#owner') openOwner(); });
+/* «Назад» и «Вперёд» в браузере */
+window.addEventListener('popstate', () => {
+  if(location.hash === '#owner'){ openOwner(); return; }
+  const m = document.getElementById('modal'); if(m) m.innerHTML = '';
+  applyHash(); window.scrollTo(0,0); render();
+});
+window.addEventListener('hashchange', () => { if(location.hash === '#owner' && state.view !== 'admin') openOwner(); });
 /* «Назад» может вернуть страницу из кеша браузера — приводим её в чувство */
 window.addEventListener('pageshow', e => {
   if(!e.persisted) return;
@@ -1638,7 +1679,8 @@ window.addEventListener('pageshow', e => {
 });
 load().then(()=>{
   renderNav();
-  if(location.hash === '#owner') openOwner(); else render();
+  if(location.hash === '#owner') openOwner();
+  else { if(!intentUsed) applyHash(); render(); }
   if(oauthNote) toast(oauthNote);
 });
 </script>
