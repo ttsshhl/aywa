@@ -454,7 +454,9 @@ async function consumeOAuth(){
   const h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
   const q = new URLSearchParams(location.search);
   const token = h.get('access_token');
-  const err = h.get('error_description') || q.get('error_description');
+  // Supabase иногда отдаёт текст ошибки закодированным дважды
+  const dec = v => { if(!v) return v; try{ return decodeURIComponent(String(v).replace(/\+/g,' ')); }catch(e){ return v; } };
+  const err = dec(h.get('error_description') || q.get('error_description'));
   if(!token && !err) return false;
   if(token){
     try{
