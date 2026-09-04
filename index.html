@@ -359,22 +359,20 @@ footer button:hover{color:var(--ink)}
    Пока они пустые, Айва работает в демо-режиме: данные лежат
    только в этом браузере. SQL для таблиц — в файле schema.sql.
 
-   ВХОД ЧЕРЕЗ ЯНДЕКС ID (Supabase → Authentication → Custom Providers):
+   ВХОД ЧЕРЕЗ ЯНДЕКС ID:
+   Custom-провайдер Supabase Яндексу не подходит: тот отдаёт почту
+   в поле default_email, а Supabase ждёт стандартный ключ email.
+   Поэтому обмен делает своя Edge Function yandex-auth (yandex-auth.ts).
    1) oauth.yandex.ru → приложение, права «Доступ к адресу почты»
-      и «Доступ к имени и фамилии»;
-   2) Redirect URI приложения = Callback URL из формы Supabase:
-      https://<ваш-проект>.supabase.co/auth/v1/callback
-   3) Supabase → Create Custom Auth Provider:
-      Provider Identifier: yandex  (в коде ниже — YA_PROVIDER)
-      Configuration Method: Manual configuration — авто-поиск не
-      сработает, у Яндекса нет /.well-known/openid-configuration
-      Authorization: https://oauth.yandex.ru/authorize
-      Token:         https://oauth.yandex.ru/token
-      User info:     https://login.yandex.ru/info?format=json
-      Scopes:        login:email,login:info
-      Client ID / Secret — из приложения Яндекса
-   4) Authentication → URL Configuration → Redirect URLs: адрес,
-      на котором лежит эта страница.
+      и «Доступ к логину, имени и фамилии, полу»;
+   2) Redirect URI приложения:
+      https://<ваш-проект>.supabase.co/functions/v1/yandex-auth/callback
+   3) supabase functions deploy yandex-auth --no-verify-jwt
+   4) Supabase → Edge Functions → Secrets: YANDEX_CLIENT_ID,
+      YANDEX_CLIENT_SECRET, ALLOWED_REDIRECTS (адрес этой страницы).
+   Функция возвращает человека сюда с одноразовым токеном в #ya=…,
+   а страница меняет его на обычную сессию через /auth/v1/verify.
+   Custom-провайдера в Supabase можно удалить, он больше не нужен.
    ============================================================ */
 const SUPABASE_URL = 'https://ckxyzhyhmiostyjejflx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNreHl6aHlobWlvc3R5amVqZmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDcxODMsImV4cCI6MjEwMzkyMzE4M30.GovGkgbb7Iuo261KjKuIhPtdu35yO8UrPn9s7Rp1DU8';
@@ -407,7 +405,8 @@ async function setSession(d){
   const md = u.user_metadata || {};
   const name = md.name || md.full_name || md.display_name || md.real_name
             || md.first_name || md.login || (u.email || '').split('@')[0] || 'Пользователь';
-  const raw = (u.app_metadata && (u.app_metadata.provider || (u.app_metadata.providers||[])[0])) || 'email';
+  const raw = md.auth_provider
+           || (u.app_metadata && (u.app_metadata.provider || (u.app_metadata.providers||[])[0])) || 'email';
   const provider = /yandex/i.test(String(raw)) ? 'yandex' : raw;
   store.user = {id:u.id, name, email:u.email || '', provider,
                 since:new Date(u.created_at || Date.now()).toLocaleDateString('ru-RU')};
@@ -428,11 +427,10 @@ const YA_LOGO = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="tr
 
 /* вход через Яндекс ID — OAuth-провайдер Supabase */
 let oauthNote = null;
-const YA_PROVIDER = 'custom:yandex';   // Provider Identifier из формы Supabase
+const YA_FN = SUPABASE_URL + '/functions/v1/yandex-auth';
 function yandexUrl(){
   const back = location.origin + location.pathname;
-  return SUPABASE_URL + '/auth/v1/authorize?provider=' + encodeURIComponent(YA_PROVIDER)
-       + '&redirect_to=' + encodeURIComponent(back);
+  return YA_FN + '/start?redirect=' + encodeURIComponent(back);
 }
 async function yandexLogin(){
   if(!REMOTE){
@@ -448,19 +446,19 @@ async function yandexLogin(){
   try{ await window.storage.set('ayva:intent', JSON.stringify({view:state.view, id:state.id})); }catch(e){}
   location.href = yandexUrl();
 }
-/* возврат от Supabase: токены сессии прилетают в хэше адреса */
+/* возврат из функции: в хэше одноразовый токен, меняем его на сессию */
 async function consumeOAuth(){
   if(!REMOTE) return false;
   const h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
-  const q = new URLSearchParams(location.search);
-  const token = h.get('access_token');
-  // Supabase иногда отдаёт текст ошибки закодированным дважды
   const dec = v => { if(!v) return v; try{ return decodeURIComponent(String(v).replace(/\+/g,' ')); }catch(e){ return v; } };
-  const err = dec(h.get('error_description') || q.get('error_description'));
+  const token = h.get('ya');
+  const err = dec(h.get('ya_error'));
   if(!token && !err) return false;
   if(token){
     try{
-      await setSession({access_token:token, refresh_token:h.get('refresh_token')});
+      const d = await sbFetch('/auth/v1/verify', {method:'POST',
+        body:JSON.stringify({type:'email', token_hash:token})});
+      await setSession(d);
       oauthNote = 'Вы вошли через Яндекс ID';
       try{
         const r = await window.storage.get('ayva:intent');
