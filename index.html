@@ -446,14 +446,36 @@ async function yandexLogin(){
   try{ await window.storage.set('ayva:intent', JSON.stringify({view:state.view, id:state.id})); }catch(e){}
   location.href = yandexUrl();
 }
-/* возврат из функции: в хэше одноразовый токен, меняем его на сессию */
+/* после входа возвращаем человека туда, куда он шёл */
+async function restoreIntent(){
+  try{
+    const r = await window.storage.get('ayva:intent');
+    if(r && r.value){
+      const i = JSON.parse(r.value);
+      if(i.view && i.view !== 'catalog'){ state.view = i.view; if(i.id) state.id = i.id; }
+    }
+    await window.storage.delete('ayva:intent');
+  }catch(e){}
+}
+
+/* возврат после входа: сессия в хэше либо одноразовый токен */
 async function consumeOAuth(){
   if(!REMOTE) return false;
   const h = new URLSearchParams((location.hash || '').replace(/^#/, ''));
   const dec = v => { if(!v) return v; try{ return decodeURIComponent(String(v).replace(/\+/g,' ')); }catch(e){ return v; } };
   const token = h.get('ya');
-  const err = dec(h.get('ya_error'));
-  if(!token && !err) return false;
+  const direct = h.get('access_token');          // GoTrue вернул сессию сам
+  const err = dec(h.get('ya_error') || h.get('error_description'));
+  if(!token && !direct && !err) return false;
+  if(direct){
+    try{
+      await setSession({access_token:direct, refresh_token:h.get('refresh_token')});
+      oauthNote = 'Вы вошли через Яндекс ID';
+      await restoreIntent();
+    }catch(e){ oauthNote = 'Не удалось завершить вход: ' + e.message; }
+    history.replaceState(null, '', location.pathname);
+    return true;
+  }
   if(token){
     try{
       // GoTrue сверяет тип токена: ссылка выдана как magiclink, но на части
@@ -467,14 +489,7 @@ async function consumeOAuth(){
       if(!d) throw last;
       await setSession(d);
       oauthNote = 'Вы вошли через Яндекс ID';
-      try{
-        const r = await window.storage.get('ayva:intent');
-        if(r && r.value){
-          const i = JSON.parse(r.value);
-          if(i.view && i.view !== 'catalog'){ state.view = i.view; if(i.id) state.id = i.id; }
-        }
-        await window.storage.delete('ayva:intent');
-      }catch(e){}
+      await restoreIntent();
     }catch(e){ oauthNote = 'Не удалось завершить вход: ' + e.message; }
   } else {
     oauthNote = 'Вход через Яндекс не завершён: ' + err;
