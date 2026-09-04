@@ -732,7 +732,7 @@ const SHOT_BUCKET = 'shots';         // бакет в Supabase Storage
 
 /* владелец площадки: панель открывается только по адресу …/#owner
    и только под этой почтой с её паролем */
-const OWNER_EMAILS = ['fixakk@yandex.ru'];
+const OWNER_EMAILS = ['andreyman96@yandex.ru'];
 const isOwner = () => !!(store.user && OWNER_EMAILS.includes(String(store.user.email || '').toLowerCase()));
 function openOwner(){
   if(isOwner()){ go('admin'); return; }
