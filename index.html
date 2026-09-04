@@ -344,8 +344,8 @@ footer button:hover{color:var(--ink)}
 
 <footer class="wrap">
   <div>
-    <span>Айва</span>
-    <button id="adminLink">Панель владельца</button>
+    <span>Айва — площадка готовых проектов</span>
+    <span>Сделки проходят через безопасную сделку, комиссия 10%</span>
   </div>
 </footer>
 
@@ -577,17 +577,51 @@ const mapThread = t => ({listingId:t.listing_id, threadId:t.id, title:t.title, s
     .map(m=>({from:m.kind==='system'?'sys':(store.user && m.sender_id===store.user.id ? 'me':'them'),
               text:m.body, time:new Date(m.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}))});
 
-async function pull(){
-  if(!REMOTE || !session) return;
+/* объявление на сервер: если в таблице нет колонки shots, кладём без неё */
+async function insertListing(l){
+  const row = {id:l.id, seller_id:store.user.id, seller_name:store.user.name,
+    title:l.title, tagline:l.tagline, cat:l.cat, price:l.price, mrr:l.mrr,
+    users_text:l.users, age_text:l.age, stack:l.stack, description:l.desc,
+    why:l.why, shots:l.shots || [], status:l.status || 'На проверке'};
   try{
-    const [ls, os, th] = await Promise.all([
-      sbSelect('listings','select=*&order=created_at.desc'),
-      sbSelect('orders','select=*,order_events(*)&order=created_at.desc'),
-      sbSelect('threads','select=*,messages(*)&order=created_at.desc')
-    ]);
-    store.listings = ls.map(mapListing);
-    store.orders = os.map(mapOrder);
-    store.chats = {}; th.forEach(t => { store.chats[t.listing_id] = mapThread(t); });
+    await sbInsert('listings', row);
+  }catch(e){
+    if(/shots/i.test(e.message)){
+      delete row.shots;
+      await sbInsert('listings', row);
+      toast('В таблице listings нет колонки shots — скриншоты сохранились только в браузере');
+    } else throw e;
+  }
+}
+/* то, что сервер не принял раньше, досылаем при следующем заходе */
+async function syncPending(){
+  if(!REMOTE || !session || !store.user) return;
+  const waiting = store.listings.filter(l => l.pendingSync);
+  if(!waiting.length) return;
+  for(const l of waiting){
+    try{ await insertListing(l); l.pendingSync = false; }
+    catch(e){ console.error(e); }
+  }
+  await save();
+}
+
+async function pull(){
+  if(!REMOTE) return;
+  try{
+    const ls = await sbSelect('listings','select=*&order=created_at.desc');
+    const remote = ls.map(mapListing);
+    const known = new Set(remote.map(l => l.id));
+    // объявления, которые ещё не доехали до сервера, не теряем
+    const waiting = store.listings.filter(l => l.pendingSync && !known.has(l.id));
+    store.listings = [...waiting, ...remote];
+    if(session){
+      const [os, th] = await Promise.all([
+        sbSelect('orders','select=*,order_events(*)&order=created_at.desc'),
+        sbSelect('threads','select=*,messages(*)&order=created_at.desc')
+      ]);
+      store.orders = os.map(mapOrder);
+      store.chats = {}; th.forEach(t => { store.chats[t.listing_id] = mapThread(t); });
+    }
     await save();
   }catch(e){ console.error(e); toast('Не удалось загрузить данные: ' + e.message); }
 }
@@ -648,6 +682,20 @@ let sellShots = [];                  // снимки, выбранные в фо
 const SHOT_MAX = 6;                  // сколько принимаем
 const SHOT_BUCKET = 'shots';         // бакет в Supabase Storage
 
+/* владелец площадки: панель открывается только по адресу …/#owner
+   и только под этой почтой с её паролем */
+const OWNER_EMAILS = ['fixakk@yandex.ru'];
+const isOwner = () => !!(store.user && OWNER_EMAILS.includes(String(store.user.email || '').toLowerCase()));
+function openOwner(){
+  if(isOwner()){ go('admin'); return; }
+  if(store.user){ toast('У этой почты нет доступа к панели'); go('catalog'); return; }
+  authMode = 'signin';
+  requireAuth('Панель владельца. Войдите почтой и паролем владельца площадки.', () => {
+    if(isOwner()) go('admin');
+    else { toast('У этой почты нет доступа к панели'); go('catalog'); }
+  });
+}
+
 const app = document.getElementById('app');
 const money = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -679,7 +727,8 @@ async function load(){
     store.seeded = true;
     const viaYandex = await consumeOAuth();
     if(!viaYandex) await sbRestore();
-    if(session) await pull();
+    await pull();               // каталог виден и без входа
+    await syncPending();
   } else if(!store.seeded){
     store.orders = [...DEMO_ORDERS]; store.seeded = true; save();
   }
@@ -1207,11 +1256,11 @@ function viewSell(){
     </div>
     <div class="two">
       <div class="field"><label for="page">Возраст проекта</label><input id="page" placeholder="2 года"></div>
-      <div class="field"><label for="pstack">На чём сделано</label><input id="pstack" placeholder="Python, aiogram"></div>
+      <div class="field"><label for="pstack">На чём сделано <span class="hint">необязательно</span></label><input id="pstack" placeholder="Python, aiogram"></div>
     </div>
     <div class="field"><label for="pdesc">Описание</label>
       <textarea id="pdesc" placeholder="Как проект зарабатывает, откуда приходят пользователи, что уже сделано."></textarea>
-      <div class="err">Расскажите о проекте хотя бы пару предложений</div></div>
+      <div class="err">Заполните поле</div></div>
     <div class="field">
       <label>Скриншоты <span class="hint">до ${SHOT_MAX} штук, png, jpg или webp</span></label>
       <input id="pshots" type="file" accept="image/png,image/jpeg,image/webp" multiple style="display:none">
@@ -1236,7 +1285,7 @@ async function submitListing(){
   let err = false;
   err = bad('pname', !val('pname')) || err;
   err = bad('ptag', !val('ptag')) || err;
-  err = bad('pdesc', val('pdesc').length < 20) || err;
+  err = bad('pdesc', !val('pdesc')) || err;
   err = bad('pprice', num(val('pprice')) < 1000) || err;
   if(err){ app.querySelector('.field.bad input, .field.bad textarea').focus(); return; }
   const d = maskContacts(val('pdesc')), t = maskContacts(val('ptag'));
@@ -1245,17 +1294,21 @@ async function submitListing(){
   btn.disabled = true;
   btn.textContent = sellShots.length ? 'Загружаем скриншоты…' : 'Отправляем…';
   const shots = await uploadShots(id);
-  store.listings.unshift({id, mine:true, status:'На проверке', title:val('pname'), tagline:t.text, cat:val('pcat'),
+  const rec = {id, mine:true, status:'На проверке', title:val('pname'), tagline:t.text, cat:val('pcat'),
     price:num(val('pprice')), mrr:num(val('pmrr')), users:val('pusers'), age:val('page'), stack:val('pstack'),
-    desc:d.text, why:val('pwhy'), includes:[], shots, seller:store.user.name, deals:'первая продажа', reply:'обычно за день', date:today()});
+    desc:d.text, why:val('pwhy'), includes:[], shots, seller:store.user.name,
+    deals:'первая продажа', reply:'обычно за день', date:today()};
+  store.listings.unshift(rec);
   await save();
-  await push(() => sbInsert('listings', {id, seller_id:store.user.id, seller_name:store.user.name,
-    title:val('pname'), tagline:t.text, cat:val('pcat'), price:num(val('pprice')), mrr:num(val('pmrr')),
-    users_text:val('pusers'), age_text:val('page'), stack:val('pstack'), description:d.text,
-    why:val('pwhy'), shots, status:'На проверке'}));
+  let failed = null;
+  if(REMOTE && session){
+    try{ await insertListing(rec); }
+    catch(e){ rec.pendingSync = true; failed = e.message; await save(); }
+  }
   sellShots = [];
   state.tab='listings'; go('cabinet');
-  toast(d.hit||t.hit ? 'Объявление отправлено, контакты в тексте скрыты' : 'Объявление отправлено на проверку');
+  if(failed) toast('Сервер не принял объявление: ' + failed + '. Пришлём его при следующем заходе');
+  else toast(d.hit||t.hit ? 'Объявление отправлено, контакты в тексте скрыты' : 'Объявление отправлено на проверку');
 }
 
 /* кабинет */
@@ -1314,6 +1367,7 @@ function viewCabinet(){
 
 /* панель владельца */
 function viewAdmin(){
+  if(!isOwner()) return `<div class="empty"><b>Панель доступна владельцу площадки</b>Войдите почтой владельца — адрес панели <span class="num">${esc(location.origin + location.pathname)}#owner</span></div>`;
   const o = store.orders;
   const done = o.filter(x=>x.status==='Завершена');
   const held = o.filter(x=>['Оплачена','Доступы переданы','Спор'].includes(x.status));
@@ -1471,8 +1525,12 @@ const val=id=>document.getElementById(id).value.trim();
 function bad(id,on){ document.getElementById(id).closest('.field').classList.toggle('bad',on); return on; }
 
 document.getElementById('logo').onclick=()=>go('catalog');
-document.getElementById('adminLink').onclick=()=>go('admin');
-load().then(()=>{ renderNav(); render(); if(oauthNote) toast(oauthNote); });
+window.addEventListener('hashchange', () => { if(location.hash === '#owner') openOwner(); });
+load().then(()=>{
+  renderNav();
+  if(location.hash === '#owner') openOwner(); else render();
+  if(oauthNote) toast(oauthNote);
+});
 </script>
 </body>
 </html>
