@@ -456,8 +456,15 @@ async function consumeOAuth(){
   if(!token && !err) return false;
   if(token){
     try{
-      const d = await sbFetch('/auth/v1/verify', {method:'POST',
-        body:JSON.stringify({type:'email', token_hash:token})});
+      // GoTrue сверяет тип токена: ссылка выдана как magiclink, но на части
+      // версий тот же токен проверяется как email — пробуем оба
+      let d = null, last = null;
+      for(const type of ['magiclink','email']){
+        try{ d = await sbFetch('/auth/v1/verify', {method:'POST',
+               body:JSON.stringify({type, token_hash:token})}); break; }
+        catch(e){ last = e; }
+      }
+      if(!d) throw last;
       await setSession(d);
       oauthNote = 'Вы вошли через Яндекс ID';
       try{
@@ -676,7 +683,7 @@ const DEMO_ORDERS = [
 
 let store = {user:null, session:null, listings:[], orders:[], chats:{}, seeded:false};
 let state = {view:'catalog', tab:'deals', cat:'Все', q:'', sort:'new', id:null, chatId:null, dealId:null,
-             method:'sbp', quick:{cheap:false, rev:false, pay:false}};
+             method:'sbp', quick:{cheap:false, rev:false}};
 let pending = null;
 let sellShots = [];                  // снимки, выбранные в форме продавца
 const SHOT_MAX = 6;                  // сколько принимаем
@@ -729,6 +736,7 @@ async function load(){
     if(!viaYandex) await sbRestore();
     await pull();               // каталог виден и без входа
     await syncPending();
+    await consumePayment();     // вернулись со страницы оплаты
   } else if(!store.seeded){
     store.orders = [...DEMO_ORDERS]; store.seeded = true; save();
   }
@@ -1109,8 +1117,8 @@ function viewPay(){
   const o = order(state.dealId); if(!o) return `<div class="empty"><b>Сделка не найдена</b></div>`;
   const M = [
     ['sbp','Система быстрых платежей','Перевод по QR-коду, зачисление за минуту'],
-    ['card','Банковская карта','Мир, Visa, Mastercard'],
-    ['inv','Счёт для ИП или компании','Оплата по реквизитам, 1–2 рабочих дня']
+    ['bank_card','Банковская карта','Мир, Visa, Mastercard'],
+    ['any','Выбрать на странице ЮKassa','Кошелёк, рассрочка и другие способы']
   ];
   return `
   <button class="back" data-deal="${o.id}">Назад к сделке</button>
@@ -1129,18 +1137,52 @@ function viewPay(){
     </div>
     <div id="payArea" style="margin-top:20px">
       <button class="btn btn-primary btn-lg" id="payGo">Оплатить ${money(o.price)}</button>
-      <div class="shield" style="margin-top:14px">${shieldIcon()}<span>Если продавец не передаст доступы, деньги вернутся вам полностью. Комиссия удерживается только с закрытой сделки.</span></div>
+      <div class="shield" style="margin-top:14px">${shieldIcon()}<span>Платёж принимает ЮKassa. Если продавец не передаст доступы, деньги вернутся вам полностью — комиссия удерживается только с закрытой сделки.</span></div>
     </div>
   </div>`;
 }
+const FN = path => SUPABASE_URL + '/functions/v1/' + path;
+async function callFn(path, body){
+  const res = await fetch(FN(path), {method:'POST',
+    headers:{'Content-Type':'application/json', apikey:SUPABASE_ANON_KEY,
+             Authorization:'Bearer ' + ((session && session.access_token) || SUPABASE_ANON_KEY)},
+    body:JSON.stringify(body || {})});
+  const d = await res.json().catch(() => ({}));
+  if(!res.ok) throw new Error(d.error || ('сервер ответил ' + res.status));
+  return d;
+}
+/* возврат со страницы ЮKassa: ?paid=<сделка> */
+async function consumePayment(){
+  const id = new URLSearchParams(location.search).get('paid');
+  if(!id) return;
+  history.replaceState(null, '', location.pathname);
+  await pull();
+  const o = order(id);
+  state.dealId = id; state.view = 'deal';
+  if(o && o.status !== 'Ожидает оплаты') toast('Оплата прошла, деньги на счёте Айвы');
+  else toast('Платёж обрабатывается. Статус сделки обновится в течение минуты');
+}
+
 async function pay(){
   const o = order(state.dealId);
-  document.getElementById('payArea').innerHTML = `<div class="paying"><span class="spin"></span>Проводим платёж…</div>`;
-  await new Promise(r => setTimeout(r, 1500));
+  const area = document.getElementById('payArea');
+  area.innerHTML = `<div class="paying"><span class="spin"></span>Готовим платёж…</div>`;
+  if(REMOTE && session){
+    try{
+      const d = await callFn('yookassa/create', {order_id:o.id, method:state.method});
+      location.href = d.url;               // дальше платёжная страница ЮKassa
+    }catch(e){
+      area.innerHTML = `<button class="btn btn-primary btn-lg" id="payGo">Оплатить ${money(o.price)}</button>`;
+      document.getElementById('payGo').onclick = pay;
+      toast('Не удалось начать оплату: ' + e.message);
+    }
+    return;
+  }
+  await new Promise(r => setTimeout(r, 1200));   // демо-режим без ключей
   o.status = 'Оплачена';
   const ev = `Оплата ${money(o.price)}, деньги на счёте Айвы`;
   o.events.push({t:shortDate(), text:ev});
-  await save(); go('deal'); toast('Оплата прошла, деньги на счёте Айвы');
+  await save(); go('deal'); toast('Демо-режим: оплата сымитирована');
   const c = store.chats[o.listingId];
   if(c){ c.messages.push({from:'sys', text:`Покупатель оплатил сделку ${o.id}. Передайте доступы через Айву.`}); c.updated = Date.now(); }
   await push(async () => {
@@ -1234,6 +1276,11 @@ async function act(id, kind){
     await sbUpdate('orders', 'id=eq.' + encodeURIComponent(o.id), {status:o.status});
     await sbInsert('order_events', {order_id:o.id, text:o.events[o.events.length-1].text});
   });
+  if(kind === 'accept' && REMOTE && session){
+    // при двухстадийном платеже удержанные деньги списываются здесь
+    try{ await callFn('yookassa/capture', {order_id:o.id}); }
+    catch(e){ toast('Приёмка отмечена, но списание не прошло: ' + e.message); }
+  }
   toast(kind==='accept'?'Сделка закрыта, деньги ушли продавцу'
       :kind==='cancel'?'Сделка отменена'
       :kind==='handover'?'Отмечено: доступы переданы покупателю'
@@ -1402,7 +1449,8 @@ function viewAdmin(){
         <span class="cell" data-l="Покупатель:">${esc(x.buyer)}</span>
         <span class="cell num" data-l="Сумма:">${money(x.price)}</span>
         <span class="cell num" data-l="Комиссия:">${x.status==='Завершена'?money(x.price*FEE):'—'}</span>
-        <span class="cell" data-l="Статус:"><select data-status="${x.id}">${ADMIN_STATUSES.map(s=>`<option${s===x.status?' selected':''}>${s}</option>`).join('')}</select></span>
+        <span class="cell" data-l="Статус:"><select data-status="${x.id}">${ADMIN_STATUSES.map(s=>`<option${s===x.status?' selected':''}>${s}</option>`).join('')}</select>
+          ${['Оплачена','Доступы переданы','Спор'].includes(x.status)?`<button class="btn btn-sm btn-bad" data-refund="${x.id}" style="margin-top:6px">Вернуть деньги</button>`:''}</span>
       </div>`).join('')}
     </div>
 
@@ -1453,6 +1501,12 @@ function bind(){
   app.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>{ state.dealId=b.dataset.pay; go('pay'); });
   app.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>act(b.dataset.cancel,'cancel'));
   app.querySelectorAll('[data-accept]').forEach(b=>b.onclick=()=>act(b.dataset.accept,'accept'));
+  app.querySelectorAll('[data-refund]').forEach(b=>b.onclick=async ()=>{
+    if(!confirm('Вернуть деньги покупателю по сделке ' + b.dataset.refund + '?')) return;
+    b.disabled = true;
+    try{ await callFn('yookassa/refund', {order_id:b.dataset.refund}); await pull(); render(); toast('Возврат отправлен в ЮKassa'); }
+    catch(e){ b.disabled = false; toast('Возврат не прошёл: ' + e.message); }
+  });
   app.querySelectorAll('[data-dispute]').forEach(b=>b.onclick=()=>act(b.dataset.dispute,'dispute'));
   app.querySelectorAll('[data-handover]').forEach(b=>b.onclick=()=>act(b.dataset.handover,'handover'));
   app.querySelectorAll('[data-order]').forEach(b=>{ const id=b.dataset.order;
