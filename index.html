@@ -20,7 +20,7 @@
   --ink:#121412; --muted:#5E635E; --faint:#767B76; --line:#E6E4DA; --line2:#D2CFC3;
   --shadow:0 16px 32px -24px rgba(20,24,20,.55);
   --quince:#177346; --quince-dk:#0F5733; --quince-soft:#E6F1EA;
-  --gold-btn:#C9922A; --gold-btn-dk:#AE7C18; --gold-soft:#FBF1DC; --on-gold:#1A1508;
+  --gold-btn:#E7B23E; --gold-btn-hi:#F2C458; --gold-soft:#FDF3DD; --on-gold:#20190A;
   --gold:#8F6A12; --bad:#A03A28; --bad-soft:#F7EAE6;
   --ui:'Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   --disp:'Onest',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -52,8 +52,12 @@ header{border-bottom:1px solid var(--line);background:rgba(245,244,239,.86);back
 
 .btn{border:1px solid var(--line2);background:var(--card);padding:9px 15px;border-radius:8px;font-size:13.5px;font-weight:500;letter-spacing:-0.01em;transition:border-color .15s,background .15s,color .15s}
 .btn:hover{border-color:var(--ink)}
-.btn-primary{background:var(--gold-btn);border-color:var(--gold-btn);color:var(--on-gold);font-weight:600}
-.btn-primary:hover{background:var(--gold-btn-dk);border-color:var(--gold-btn-dk)}
+.btn-primary{background:var(--gold-btn);border-color:var(--gold-btn);color:var(--on-gold);font-weight:600;
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset}
+.btn-primary:hover{background:var(--gold-btn-hi);border-color:var(--gold-btn-hi);
+  box-shadow:0 0 0 3px rgba(231,178,62,.26), 0 10px 24px -12px rgba(214,157,36,.8),
+             0 1px 0 rgba(255,255,255,.4) inset}
+.btn-primary:active{background:var(--gold-btn);box-shadow:none}
 .btn-lg{padding:13px 20px;font-size:15px;width:100%}
 .btn-ghost{border-color:transparent;background:none;color:var(--muted)}
 .btn-ghost:hover{color:var(--ink);background:var(--tint2);border-color:transparent}
@@ -96,7 +100,7 @@ select{padding:5px 26px 5px 10px;border:1px solid var(--line);border-radius:8px;
      transition:transform .16s,box-shadow .16s,border-color .16s}
 .row:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--line2)}
 .row:active{transform:translateY(0)}
-.tile{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.tile{width:38px;display:flex;align-items:center;justify-content:center;flex:none}
 .tile svg{display:block}
 .r-main{min-width:0}
 .r-title{display:block;font-size:18px;font-weight:600;letter-spacing:-0.03em;line-height:1.2}
@@ -110,7 +114,7 @@ select{padding:5px 26px 5px 10px;border:1px solid var(--line);border-radius:8px;
 .kindline{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .r-ok{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--quince);font-weight:500}
 .r-ok svg{flex:none}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px 4px 9px;border-radius:20px;font-size:12.5px;font-weight:500}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 8px;border-radius:20px;font-size:12.5px;font-weight:500}
 .empty{padding:44px 20px;color:var(--muted);font-size:14.5px;background:var(--card);border:1px solid var(--line);border-radius:14px}
 .empty b{display:block;color:var(--ink);font-weight:600;margin-bottom:5px;font-size:16px;letter-spacing:-0.02em}
 
@@ -315,7 +319,7 @@ footer button:hover{color:var(--ink)}
   .row{grid-template-columns:auto minmax(0,1fr);gap:12px 14px;padding:14px 15px}
   .r-title{font-size:16.5px}
   .r-price{grid-column:2;text-align:left;font-size:22px;margin-top:2px}
-  .tile{width:40px;height:40px;border-radius:11px}
+  .tile{width:32px}
   .detail,.cols{grid-template-columns:1fr;gap:30px}
   .panel{position:static}
   .detail h1{font-size:28px}
@@ -910,42 +914,28 @@ function renderNav(){
 
 const CHECK = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.4 4.6 9 10 3.2"/></svg>`;
 /* пиксельные значки: сетка 11×11, каждый символ — цвет */
-const PIX_W = 11;
+const PIX_W = 14;
 const PIX = {
-  'Приложения': [
-    '..1111111..','..1222221..','..1222221..','..1222221..','..1222221..','..1222221..',
-    '..1222221..','..1222221..','..1223221..','..1222221..','..1111111..'],
-  'Игры': [
-    '...........','..1.....1..','...1...1...','..1111111..','.11.111.11.','11111111111',
-    '1.1111111.1','1.1.....1.1','...11.11...','...........','...........'],
-  'Телеграм-боты': [
-    '.111111111.','12222222221','12233333221','12222222221','12233333221','12222222221',
-    '12233322221','12222222221','.111111111.','..111......','..1........'],
-  'Телеграм-каналы': [
-    '.....1.....','....111....','.1..111..1.','1.1.111.1.1','1.1.111.1.1','.1..111..1.',
-    '....111....','....111....','...11111...','..1111111..','...........'],
-  'Веб-сервисы': [
-    '...........','11111111111','13131311111','11111111111','12222222221','12233333221',
-    '12222222221','12233322221','12222222221','11111111111','...........'],
-  'ИИ': [
-    '...........','.....1.....','....111....','....111....','..1111111..','11111111111',
-    '..1111111..','....111....','....111....','.....1.....','...........'],
-  'Все': [
-    '...........','.1111.1111.','.1111.1111.','.1111.1111.','.1111.1111.','...........',
-    '.1111.1111.','.1111.1111.','.1111.1111.','.1111.1111.','...........'],
+  'Приложения': ['....111111....','...11111111...','...12222221...','...12222221...','...12333321...','...12222221...','...12333221...','...12222221...','...12333321...','...12222221...','...12222221...','...11333311...','...11111111...','....111111....'],
+  'Игры': ['..............','..............','..............','..1111111111..','.111111111111.','11112111121211','11122211112111','11112111112111','11112111121211','.111111111111.','..111....111..','..............','..............','..............'],
+  'Телеграм-боты': ['......11......','......11......','..1111111111..','..1111111111..','..1222222221..','.112332233211.','.112332233211.','.112222222211.','.112233332211.','..1222222221..','..1111111111..','..1111111111..','..............','..............'],
+  'Телеграм-каналы': ['..............','..............','.......1...2..','......11....2.','.....111.2...2','.1111111..2..2','.1111111..2..2','.1111111..2..2','.1111111..2..2','..11.111.2...2','..11..11....2.','..11...1...2..','..............','..............'],
+  'Веб-сервисы': ['..............','..............','.111111111111.','.111111111111.','.112121211111.','.111111111111.','.122222222221.','.123333332221.','.122222222221.','.123333222221.','.122222222221.','.122222222221.','.111111111111.','..............'],
+  'ИИ': ['......11......','.2....11......','222..1111.....','.2...1111.....','....111111....','...11221111...','.111121111111.','.111111111111.','...11111111...','....111111....','.....1111.....','.....1111.....','......11......','......11......'],
+  'Все': ['..............','.111111.222222','.111111.222222','.111111.222222','.111111.222222','.111111.222222','.111111.222222','..............','.222222.111111','.222222.111111','.222222.111111','.222222.111111','.222222.111111','.222222.111111'],
 };
 const AYVA_PIX = [
   '.....4.....','.....43333.','...111433..','..1122111..','.112211111.','11111111111',
   '11111111111','11111111111','.111111111.','..1111111..','....111....'];
 const CAT_TINT = {
-  'Приложения':  {ink:'#2F63D8', soft:'#E9EFFC'},
-  'Игры':        {ink:'#7A45CE', soft:'#F0E9FB'},
-  'Телеграм-боты':   {ink:'#1B87CE', soft:'#E3F1FA'},
-  'Телеграм-каналы': {ink:'#C2557A', soft:'#FBE9EF'},
-  'Веб-сервисы': {ink:'#0E8A6E', soft:'#E1F2EE'},
-  'ИИ':          {ink:'#A9760F', soft:'#FAEFD6'},
+  'Приложения':      {ink:'#2F63D8', mid:'#A9BFF0', dark:'#234BA6'},
+  'Игры':            {ink:'#7A45CE', mid:'#C4ABEB', dark:'#5C31A0'},
+  'Телеграм-боты':   {ink:'#1B87CE', mid:'#A3D0EC', dark:'#14669C'},
+  'Телеграм-каналы': {ink:'#C2557A', mid:'#EBB2C4', dark:'#963F5D'},
+  'Веб-сервисы':     {ink:'#0E8A6E', mid:'#97D4C4', dark:'#0A6853'},
+  'ИИ':              {ink:'#A9760F', mid:'#E3C68A', dark:'#82590A'},
 };
-const tint = cat => CAT_TINT[cat] || {ink:'#177346', soft:'#E6F1EA'};
+const tint = cat => CAT_TINT[cat] || {ink:'#177346', mid:'#9CCBB2', dark:'#0F5733'};
 
 function pixSvg(grid, colors, size){
   let out = '';
@@ -960,16 +950,15 @@ function catIcon(cat, size, mono){
   const grid = PIX[cat] || PIX['Веб-сервисы'];
   const t = tint(cat);
   return pixSvg(grid, mono ? {'1':'currentColor','2':'none','3':'currentColor'}
-                           : {'1':t.ink, '2':'#FFFFFF', '3':t.ink}, size || 22);
+                           : {'1':t.ink, '2':t.mid, '3':t.dark}, size || 22);
 }
 function catTile(cat, size){
-  const t = tint(cat);
-  return `<span class="tile" style="background:${t.soft}">${catIcon(cat, size || 24)}</span>`;
+  return `<span class="tile">${catIcon(cat, size || 34)}</span>`;
 }
 function catPill(cat){
   const t = tint(cat);
-  return `<span class="pill" style="background:${t.soft};color:${t.ink}">`
-       + `${catIcon(cat, 13, true)}${esc(KIND_LABEL[cat] || cat)}</span>`;
+  return `<span class="pill" style="background:${t.mid}33;color:${t.dark}">`
+       + `${catIcon(cat, 15)}${esc(KIND_LABEL[cat] || cat)}</span>`;
 }
 const ayvaMark = size => pixSvg(AYVA_PIX,
   {'1':'#177346','2':'#54B27C','3':'#C9922A','4':'#6B4A16'}, size || 26);
