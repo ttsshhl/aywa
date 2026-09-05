@@ -1469,7 +1469,14 @@ function viewCabinet(){
       : `<div class="empty"><b>Вы ещё ничего не продаёте</b>Размещение бесплатное.
          <div style="margin-top:16px"><button class="btn btn-primary" data-go="sell">Выставить проект</button></div></div>`,
     profile: `<div style="max-width:420px;padding-top:8px">
-        <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>Имя</span><b>${esc(store.user.name)}</b></div>
+        <div class="field" style="margin-bottom:18px">
+          <label for="uname">Имя и фамилия <span class="hint">его видят другие участники</span></label>
+          <div style="display:flex;gap:8px">
+            <input id="uname" value="${esc(store.user.name)}" maxlength="40" autocomplete="name">
+            <button class="btn" id="saveName" style="white-space:nowrap">Сохранить</button>
+          </div>
+          <div class="err">Имя должно быть от 2 до 40 символов</div>
+        </div>
         <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>Почта</span><b>${esc(store.user.email || '—')}</b></div>
         <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>Способ входа</span><b>${store.user.provider==='yandex'?'Яндекс ID':'почта и пароль'}</b></div>
         <div class="line" style="padding:12px 0;border-bottom:1px solid var(--line)"><span>В Айве с</span><b>${esc(store.user.since)}</b></div>
@@ -1560,6 +1567,40 @@ function render(){
   }
   const m = document.getElementById('msgs'); if(m) m.scrollTop = m.scrollHeight;
 }
+async function renameUser(){
+  const box = document.getElementById('uname').closest('.field');
+  const name = document.getElementById('uname').value.trim().replace(/\s+/g, ' ');
+  box.classList.toggle('bad', name.length < 2 || name.length > 40);
+  if(box.classList.contains('bad')) return;
+  if(name === store.user.name) return toast('Имя не изменилось');
+
+  const btn = document.getElementById('saveName');
+  btn.disabled = true; btn.textContent = 'Сохраняем…';
+  const was = store.user.name;
+  store.user.name = name;
+
+  if(REMOTE && session){
+    try{
+      // имя живёт в профиле аккаунта
+      await sbFetch('/auth/v1/user', {method:'PUT', body:JSON.stringify({data:{name}})});
+      // и в копиях, по которым его видят другие: объявления и сделки
+      await sbFetch(`/rest/v1/listings?seller_id=eq.${store.user.id}`,
+        {method:'PATCH', headers:{Prefer:'return=minimal'}, body:JSON.stringify({seller_name:name})});
+      await sbFetch(`/rest/v1/orders?buyer_id=eq.${store.user.id}`,
+        {method:'PATCH', headers:{Prefer:'return=minimal'}, body:JSON.stringify({buyer_name:name})});
+    }catch(e){
+      store.user.name = was;
+      btn.disabled = false; btn.textContent = 'Сохранить';
+      return toast('Не удалось сохранить имя: ' + e.message);
+    }
+  }
+  store.listings.forEach(l => { if(l.mine) l.seller = name; });
+  store.orders.forEach(o => { if(o.mine) o.buyer = name; });
+  await save();
+  renderNav(); render();
+  toast('Имя обновлено');
+}
+
 function bind(){
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>go('listing', b.dataset.open));
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{
@@ -1613,6 +1654,9 @@ function bind(){
   const pg=document.getElementById('payGo'); if(pg) pg.onclick=pay;
   const ms=document.getElementById('msend'); if(ms) ms.onclick=sendMsg;
   const mt=document.getElementById('mtext'); if(mt) mt.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } };
+  const sn=document.getElementById('saveName'); if(sn) sn.onclick=renameUser;
+  const un=document.getElementById('uname');
+  if(un) un.onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); renameUser(); } };
   const lo=document.getElementById('logout'); if(lo) lo.onclick=async()=>{
     await push(() => sbFetch('/auth/v1/logout', {method:'POST'}));
     session=null; store.user=null; store.session=null;
