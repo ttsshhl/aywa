@@ -405,6 +405,24 @@ footer button:hover{color:var(--ink)}
 const SUPABASE_URL = 'https://ckxyzhyhmiostyjejflx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNreHl6aHlobWlvc3R5amVqZmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDcxODMsImV4cCI6MjEwMzkyMzE4M30.GovGkgbb7Iuo261KjKuIhPtdu35yO8UrPn9s7Rp1DU8';
 const REMOTE = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+/* Хранилище на диске браузера. window.storage есть только в песочнице,
+   где собиралась страница; на сайте работает localStorage. */
+const box = {
+  async get(k){
+    if(window.storage) return window.storage.get(k);
+    const v = localStorage.getItem(k);
+    return v === null ? null : {value:v};
+  },
+  async set(k, v){
+    if(window.storage) return window.storage.set(k, v);
+    localStorage.setItem(k, v);
+  },
+  async delete(k){
+    if(window.storage) return window.storage.delete(k);
+    localStorage.removeItem(k);
+  }
+};
 let session = null;
 
 async function sbFetch(path, opts = {}){
@@ -471,19 +489,19 @@ async function yandexLogin(){
     return;
   }
   // запоминаем, куда человек шёл: после возврата с Яндекса страница перезагрузится
-  try{ await window.storage.set('ayva:intent', JSON.stringify({view:state.view, id:state.id})); }catch(e){}
+  try{ await box.set('ayva:intent', JSON.stringify({view:state.view, id:state.id})); }catch(e){}
   location.href = yandexUrl();
 }
 /* после входа возвращаем человека туда, куда он шёл */
 let intentUsed = false;    // после входа вернули человека на прежний экран
 async function restoreIntent(){
   try{
-    const r = await window.storage.get('ayva:intent');
+    const r = await box.get('ayva:intent');
     if(r && r.value){
       const i = JSON.parse(r.value);
       if(i.view && i.view !== 'catalog'){ state.view = i.view; if(i.id) state.id = i.id; intentUsed = true; }
     }
-    await window.storage.delete('ayva:intent');
+    await box.delete('ayva:intent');
   }catch(e){}
 }
 
@@ -779,7 +797,7 @@ function maskContacts(text){
 }
 
 async function load(){
-  try{ const r = await window.storage.get('ayva:data'); if(r && r.value) store = JSON.parse(r.value); }catch(e){}
+  try{ const r = await box.get('ayva:data'); if(r && r.value) store = JSON.parse(r.value); }catch(e){}
   store.listings = store.listings || []; store.orders = store.orders || []; store.chats = store.chats || {};
   if(REMOTE){
     store.seeded = true;
@@ -792,7 +810,7 @@ async function load(){
     store.orders = [...DEMO_ORDERS]; store.seeded = true; save();
   }
 }
-async function save(){ try{ await window.storage.set('ayva:data', JSON.stringify(store)); }catch(e){ console.error(e); } }
+async function save(){ try{ await box.set('ayva:data', JSON.stringify(store)); }catch(e){ console.error(e); } }
 
 /* адрес страницы для текущего экрана — по нему работают «Назад» и «Вперёд» */
 function hashFor(view){
