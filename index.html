@@ -503,6 +503,7 @@ async function yandexLogin(){
   location.href = yandexUrl();
 }
 /* после входа возвращаем человека туда, куда он шёл */
+let booting = REMOTE;      // первый заход: объявления ещё едут с сервера
 let intentUsed = false;    // после входа вернули человека на прежний экран
 async function restoreIntent(){
   try{
@@ -786,7 +787,9 @@ const app = document.getElementById('app');
 const money = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const published = () => store.listings.filter(l => l.status === 'Опубликовано');
-const all = () => [...published(), ...SEED];
+/* Демо-подборка в каталоге. false — показывать только реальные объявления. */
+const SHOW_DEMO = true;
+const all = () => SHOW_DEMO ? [...published(), ...SEED] : published();
 const find = id => [...store.listings, ...SEED].find(l => l.id === id);
 const order = id => store.orders.find(o => o.id === id);
 const now = () => new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -1056,7 +1059,8 @@ function viewCatalog(){
   </div>
 
   <div class="reg">
-    ${list.length ? list.map(assetRow).join('')
+    ${(booting && !store.listings.length) ? `<div class="loading">Загружаем каталог…</div>`
+      : list.length ? list.map(assetRow).join('')
       : `<div class="empty"><b>Ничего не нашлось</b>Снимите фильтр или выберите другую категорию.</div>`}
   </div>`;
 }
@@ -1751,6 +1755,7 @@ window.addEventListener('pageshow', e => {
   render();                       // страница на экране, дальше догружаем фоном
 
   await loadRemote();
+  booting = false;
   renderNav();
   if(location.hash === '#owner') openOwner();
   else { if(!intentUsed) applyHash(); render(); }
