@@ -431,7 +431,17 @@ async function sbFetch(path, opts = {}){
     'Authorization': 'Bearer ' + ((session && session.access_token) || SUPABASE_ANON_KEY),
     'Content-Type': 'application/json'
   }, opts.headers || {});
-  const res = await fetch(SUPABASE_URL + path, Object.assign({}, opts, {headers}));
+  // без ограничения по времени зависший запрос держал бы весь экран
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), opts.timeout || 12000);
+  let res;
+  try{
+    res = await fetch(SUPABASE_URL + path, Object.assign({}, opts, {headers, signal:stop.signal}));
+  }catch(e){
+    clearTimeout(timer);
+    throw new Error(e.name === 'AbortError' ? 'сервер долго не отвечает' : e.message);
+  }
+  clearTimeout(timer);
   const raw = await res.text();
   let data = null; try{ data = raw ? JSON.parse(raw) : null; }catch(e){ data = raw; }
   if(!res.ok) throw new Error((data && (data.error_description || data.msg || data.message || data.error)) || 'ошибка запроса');
@@ -796,18 +806,25 @@ function maskContacts(text){
   return {text:out, hit};
 }
 
-async function load(){
+/* Сохранённое состояние: читается мгновенно, страницу можно показывать сразу */
+async function loadLocal(){
   try{ const r = await box.get('ayva:data'); if(r && r.value) store = JSON.parse(r.value); }catch(e){}
   store.listings = store.listings || []; store.orders = store.orders || []; store.chats = store.chats || {};
-  if(REMOTE){
-    store.seeded = true;
+  if(REMOTE) store.seeded = true;
+  else if(!store.seeded){ store.orders = [...DEMO_ORDERS]; store.seeded = true; save(); }
+}
+/* Всё, что требует сети. Идёт фоном, экран уже нарисован. */
+async function loadRemote(){
+  if(!REMOTE) return;
+  try{
     const viaYandex = await consumeOAuth();
     if(!viaYandex) await sbRestore();
     await pull();               // каталог виден и без входа
     await syncPending();
     await consumePayment();     // вернулись со страницы оплаты
-  } else if(!store.seeded){
-    store.orders = [...DEMO_ORDERS]; store.seeded = true; save();
+  }catch(e){
+    console.error(e);
+    toast('Не удалось связаться с сервером: ' + e.message);
   }
 }
 async function save(){ try{ await box.set('ayva:data', JSON.stringify(store)); }catch(e){ console.error(e); } }
@@ -1079,7 +1096,6 @@ function viewListing(){
       </div>
       <hr>
       <div class="line"><span>Продавец</span><b>${esc(l.seller||'вы')}</b></div>
-      <div class="line"><span>История</span><b>${esc(l.deals||'первая продажа')}</b></div>
       <div class="line"><span>Отвечает</span><b>${esc(l.reply||'обычно за день')}</b></div>
       <hr>
       <div class="shield">${shieldIcon()}<span>Деньги хранятся на счёте Айвы и уходят продавцу только после того, как вы подтвердите передачу доступов.</span></div>
@@ -1386,12 +1402,12 @@ function viewSell(){
   <div class="form">
     <h1>Выставить проект на продажу</h1>
     <p>Карточка появится в каталоге после проверки. Размещение бесплатное, 10% удерживаются только с состоявшейся сделки.</p>
-    <div class="field"><label for="pname">Название проекта</label><input id="pname" placeholder="Запись24"><div class="err">Заполните поле</div></div>
-    <div class="field"><label for="ptag">Одна строка о проекте</label><input id="ptag" placeholder="Бот онлайн-записи для мастеров маникюра"><div class="err">Заполните поле</div></div>
+    <div class="field"><label for="pname">Название проекта</label><input id="pname"><div class="err">Заполните поле</div></div>
+    <div class="field"><label for="ptag">Одна строка о проекте</label><input id="ptag"><div class="err">Заполните поле</div></div>
     <div class="field"><label for="pcat">Категория</label><select id="pcat">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
     <div class="two">
-      <div class="field"><label for="pmrr">Выручка в месяц, ₽ <span class="hint">0, если нет</span></label><input id="pmrr" inputmode="numeric" placeholder="41000"></div>
-      <div class="field"><label for="pusers">Аудитория</label><input id="pusers" placeholder="620 мастеров"></div>
+      <div class="field"><label for="pmrr">Выручка в месяц, ₽ <span class="hint">0, если нет</span></label><input id="pmrr" inputmode="numeric"></div>
+      <div class="field"><label for="pusers">Аудитория</label><input id="pusers"></div>
     </div>
     <div class="two">
       <div class="field"><label for="page">Возраст проекта</label><input id="page" placeholder="2 года"></div>
@@ -1728,12 +1744,18 @@ window.addEventListener('pageshow', e => {
   const m = document.getElementById('modal'); if(m) m.innerHTML = '';
   renderNav(); render();
 });
-load().then(()=>{
+(async () => {
+  await loadLocal();
+  renderNav();
+  applyHash();
+  render();                       // страница на экране, дальше догружаем фоном
+
+  await loadRemote();
   renderNav();
   if(location.hash === '#owner') openOwner();
   else { if(!intentUsed) applyHash(); render(); }
   if(oauthNote) toast(oauthNote);
-});
+})();
 </script>
 </body>
 </html>
