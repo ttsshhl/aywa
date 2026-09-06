@@ -601,11 +601,13 @@ async function sbUpload(path, blob){
 }
 async function uploadShots(listingId){
   if(!sellShots.length) return [];
-  if(!REMOTE || !session) return sellShots.map(s => s.url);   // демо-режим: храним прямо в браузере
   const out = [];
   for(let i = 0; i < sellShots.length; i++){
+    const shot = sellShots[i];
+    if(shot.existing){ out.push(shot.url); continue; }        // уже лежит в хранилище
+    if(!REMOTE || !session){ out.push(shot.url); continue; }  // демо-режим: прямо в браузере
     const path = `${store.user.id}/${listingId}/${i + 1}-${Date.now()}.jpg`;
-    try{ out.push(await sbUpload(path, sellShots[i].blob)); }
+    try{ out.push(await sbUpload(path, shot.blob)); }
     catch(e){ toast(`Скриншот ${i + 1} не загрузился: ${e.message}`); }
   }
   return out;
@@ -766,6 +768,7 @@ let state = {view:'catalog', tab:'deals', cat:'Все', q:'', sort:'new', id:nul
              method:'sbp', quick:{cheap:false, rev:false}};
 let pending = null;
 let sellShots = [];                  // снимки, выбранные в форме продавца
+let editId = null;                   // правим существующее объявление, а не создаём
 const SHOT_MAX = 6;                  // сколько принимаем
 const SHOT_BUCKET = 'shots';         // бакет в Supabase Storage
 
@@ -860,7 +863,7 @@ function applyHash(){
   state.view = 'catalog';
 }
 function go(view, id){
-  if(view === 'sell') sellShots = [];
+  if(view === 'sell' && !editId) sellShots = [];
   state.view = view; if(id) state.id = id;
   const h = hashFor(view);
   if(h !== location.hash) history.pushState({view}, '', h);
@@ -946,7 +949,7 @@ function renderNav(){
        <button class="who" id="nCab"><span class="ava">${esc(store.user.name.trim()[0]||'·')}</span>Кабинет</button>`
     : `<button class="btn btn-ghost" data-nav="catalog">Каталог</button><button class="btn btn-ghost" id="nCab">Кабинет</button><button class="btn btn-primary" id="nSell">Продать проект</button>`;
   nav.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => go('catalog'));
-  document.getElementById('nSell').onclick = () => requireAuth('Чтобы выставить проект на продажу, представьтесь.', () => go('sell'));
+  document.getElementById('nSell').onclick = () => requireAuth('Чтобы выставить проект на продажу, представьтесь.', () => { editId = null; go('sell'); });
   document.getElementById('nCab').onclick = () => requireAuth('В кабинете лежат ваши сделки и переписка.', () => go('cabinet'));
 }
 
@@ -1401,24 +1404,27 @@ async function act(id, kind){
 
 /* продавец */
 function viewSell(){
+  const e = editId ? store.listings.find(x => x.id === editId) : null;
+  const v = f => e ? esc(e[f] == null ? '' : e[f]) : '';
   return `
-  <button class="back" data-go="catalog">Назад в каталог</button>
+  <button class="back" data-go="${e ? 'cabinet' : 'catalog'}">${e ? 'Назад в кабинет' : 'Назад в каталог'}</button>
   <div class="form">
-    <h1>Выставить проект на продажу</h1>
-    <p>Карточка появится в каталоге после проверки. Размещение бесплатное, 10% удерживаются только с состоявшейся сделки.</p>
-    <div class="field"><label for="pname">Название проекта</label><input id="pname"><div class="err">Заполните поле</div></div>
-    <div class="field"><label for="ptag">Одна строка о проекте</label><input id="ptag"><div class="err">Заполните поле</div></div>
-    <div class="field"><label for="pcat">Категория</label><select id="pcat">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <h1>${e ? 'Правка объявления' : 'Выставить проект на продажу'}</h1>
+    <p>${e ? 'После сохранения карточка снова уйдёт на проверку и вернётся в каталог, когда её одобрят.'
+           : 'Карточка появится в каталоге после проверки. Размещение бесплатное, 10% удерживаются только с состоявшейся сделки.'}</p>
+    <div class="field"><label for="pname">Название проекта</label><input id="pname" value="${v('title')}"><div class="err">Заполните поле</div></div>
+    <div class="field"><label for="ptag">Одна строка о проекте</label><input id="ptag" value="${v('tagline')}"><div class="err">Заполните поле</div></div>
+    <div class="field"><label for="pcat">Категория</label><select id="pcat">${CATS.map(c=>`<option${e && e.cat === c ? ' selected' : ''}>${c}</option>`).join('')}</select></div>
     <div class="two">
-      <div class="field"><label for="pmrr">Выручка в месяц, ₽ <span class="hint">0, если нет</span></label><input id="pmrr" inputmode="numeric"></div>
-      <div class="field"><label for="pusers">Аудитория</label><input id="pusers"></div>
+      <div class="field"><label for="pmrr">Выручка в месяц, ₽ <span class="hint">0, если нет</span></label><input id="pmrr" inputmode="numeric" value="${e ? e.mrr : ''}"></div>
+      <div class="field"><label for="pusers">Аудитория</label><input id="pusers" value="${v('users')}"></div>
     </div>
     <div class="two">
-      <div class="field"><label for="page">Возраст проекта</label><input id="page" placeholder="2 года"></div>
-      <div class="field"><label for="pstack">На чём сделано <span class="hint">необязательно</span></label><input id="pstack" placeholder="Python, aiogram"></div>
+      <div class="field"><label for="page">Возраст проекта</label><input id="page" placeholder="2 года" value="${v('age')}"></div>
+      <div class="field"><label for="pstack">На чём сделано <span class="hint">необязательно</span></label><input id="pstack" placeholder="Python, aiogram" value="${v('stack')}"></div>
     </div>
     <div class="field"><label for="pdesc">Описание</label>
-      <textarea id="pdesc" placeholder="Как проект зарабатывает, откуда приходят пользователи, что уже сделано."></textarea>
+      <textarea id="pdesc" placeholder="Как проект зарабатывает, откуда приходят пользователи, что уже сделано.">${v('desc')}</textarea>
       <div class="err">Заполните поле</div></div>
     <div class="field">
       <label>Скриншоты <span class="hint">до ${SHOT_MAX} штук, png, jpg или webp</span></label>
@@ -1429,14 +1435,15 @@ function viewSell(){
       </div>
       <div class="shots" id="pshotsGrid"></div>
     </div>
-    <div class="field"><label for="pwhy">Почему продаёте <span class="hint">необязательно</span></label><input id="pwhy" placeholder="Не хватает времени на поддержку"></div>
-    <div class="field"><label for="pprice">Цена, ₽</label><input id="pprice" inputmode="numeric" placeholder="320000"><div class="err">Укажите цену числом</div></div>
+    <div class="field"><label for="pwhy">Почему продаёте <span class="hint">необязательно</span></label><input id="pwhy" placeholder="Не хватает времени на поддержку" value="${v('why')}"></div>
+    <div class="field"><label for="pprice">Цена, ₽</label><input id="pprice" inputmode="numeric" placeholder="320000" value="${e ? e.price : ''}"><div class="err">Укажите цену числом</div></div>
     <div class="calc">
       <div class="line"><span>Цена в каталоге</span><b class="num" id="cPrice">0 ₽</b></div>
       <div class="line"><span>Комиссия Айвы 10%</span><b class="num" id="cFee">0 ₽</b></div>
       <div class="line tot"><span>Вы получите после приёмки</span><b class="num" id="cNet">0 ₽</b></div>
     </div>
-    <button class="btn btn-primary btn-lg" id="sendListing">Отправить на проверку</button>
+    <button class="btn btn-primary btn-lg" id="sendListing">${e ? 'Сохранить и отправить на проверку' : 'Отправить на проверку'}</button>
+    ${e ? `<button class="btn btn-lg" id="cancelEdit" style="margin-top:8px">Отменить правку</button>` : ''}
     <div class="shield" style="margin-top:14px">${shieldIcon()}<span>Контакты в карточке публиковать нельзя — покупатели напишут вам в чат Айвы.</span></div>
   </div>`;
 }
@@ -1448,25 +1455,44 @@ async function submitListing(){
   err = bad('pprice', num(val('pprice')) < 1000) || err;
   if(err){ app.querySelector('.field.bad input, .field.bad textarea').focus(); return; }
   const d = maskContacts(val('pdesc')), t = maskContacts(val('ptag'));
-  const id = 'OB-' + Math.floor(1000 + Math.random()*8999);
+  const id = editId || ('OB-' + Math.floor(1000 + Math.random()*8999));
   const btn = document.getElementById('sendListing');
   btn.disabled = true;
   btn.textContent = sellShots.length ? 'Загружаем скриншоты…' : 'Отправляем…';
   const shots = await uploadShots(id);
-  const rec = {id, mine:true, status:'На проверке', title:val('pname'), tagline:t.text, cat:val('pcat'),
-    price:num(val('pprice')), mrr:num(val('pmrr')), users:val('pusers'), age:val('page'), stack:val('pstack'),
-    desc:d.text, why:val('pwhy'), includes:[], shots, seller:store.user.name,
-    deals:'первая продажа', reply:'обычно за день', date:today()};
-  store.listings.unshift(rec);
-  await save();
+  const fields = {title:val('pname'), tagline:t.text, cat:val('pcat'),
+    price:num(val('pprice')), mrr:num(val('pmrr')), users:val('pusers'), age:val('page'),
+    stack:val('pstack'), desc:d.text, why:val('pwhy'), shots, status:'На проверке'};
+
   let failed = null;
-  if(REMOTE && session){
-    try{ await insertListing(rec); }
-    catch(e){ rec.pendingSync = true; failed = e.message; await save(); }
+  if(editId){
+    const rec = store.listings.find(x => x.id === editId);
+    Object.assign(rec, fields);
+    await save();
+    if(REMOTE && session){
+      try{
+        await sbUpdate('listings', 'id=eq.' + encodeURIComponent(id), {
+          title:fields.title, tagline:fields.tagline, cat:fields.cat, price:fields.price,
+          mrr:fields.mrr, users_text:fields.users, age_text:fields.age, stack:fields.stack,
+          description:fields.desc, why:fields.why, shots:fields.shots, status:'На проверке'});
+      }catch(e){ failed = e.message; }
+    }
+  } else {
+    const rec = Object.assign({id, mine:true, includes:[], seller:store.user.name,
+      reply:'обычно за день', date:today()}, fields);
+    store.listings.unshift(rec);
+    await save();
+    if(REMOTE && session){
+      try{ await insertListing(rec); }
+      catch(e){ rec.pendingSync = true; failed = e.message; await save(); }
+    }
   }
-  sellShots = [];
+
+  const wasEdit = !!editId;
+  editId = null; sellShots = [];
   state.tab='listings'; go('cabinet');
-  if(failed) toast('Сервер не принял объявление: ' + failed + '. Пришлём его при следующем заходе');
+  if(failed) toast('Сервер не принял изменения: ' + failed);
+  else if(wasEdit) toast('Изменения сохранены, объявление ушло на повторную проверку');
   else toast(d.hit||t.hit ? 'Объявление отправлено, контакты в тексте скрыты' : 'Объявление отправлено на проверку');
 }
 
@@ -1503,7 +1529,10 @@ function viewCabinet(){
     listings: mine.length ? mine.map(l=>`
       <div class="item"><span><span class="item-t">${esc(l.title)} <span class="tag ${l.status==='Опубликовано'?'tag-ok':l.status==='Отклонено'?'tag-bad':'tag-wait'}">${esc(l.status)}</span></span>
       <span class="item-m">${l.status==='Опубликовано'?'в каталоге':'проверяем карточку'}, на руки ${money(l.price*(1-FEE))}${(l.shots||[]).length?`, ${l.shots.length} ${plural(l.shots.length,'скриншот','скриншота','скриншотов')}`:', без скриншотов'}</span></span>
-      <span class="price num">${money(l.price)}<small>комиссия ${money(l.price*FEE)}</small></span></div>`).join('')
+      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <span class="price num">${money(l.price)}<small>комиссия ${money(l.price*FEE)}</small></span>
+        <button class="btn btn-sm" data-edit="${l.id}">Редактировать</button>
+      </span></div>`).join('')
       : `<div class="empty"><b>Вы ещё ничего не продаёте</b>Размещение бесплатное.
          <div style="margin-top:16px"><button class="btn btn-primary" data-go="sell">Выставить проект</button></div></div>`,
     profile: `<div style="max-width:420px;padding-top:8px">
@@ -1605,6 +1634,15 @@ function render(){
   }
   const m = document.getElementById('msgs'); if(m) m.scrollTop = m.scrollHeight;
 }
+/* открыть своё объявление на правку */
+function editListing(id){
+  const l = store.listings.find(x => x.id === id);
+  if(!l || !l.mine) return toast('Это объявление не ваше');
+  editId = id;
+  sellShots = (l.shots || []).map(u => ({url:u, existing:true}));
+  go('sell');
+}
+
 async function renameUser(){
   const box = document.getElementById('uname').closest('.field');
   const name = document.getElementById('uname').value.trim().replace(/\s+/g, ' ');
@@ -1692,6 +1730,9 @@ function bind(){
   const pg=document.getElementById('payGo'); if(pg) pg.onclick=pay;
   const ms=document.getElementById('msend'); if(ms) ms.onclick=sendMsg;
   const mt=document.getElementById('mtext'); if(mt) mt.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } };
+  app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editListing(b.dataset.edit));
+  const ce=document.getElementById('cancelEdit');
+  if(ce) ce.onclick=()=>{ editId=null; sellShots=[]; state.tab='listings'; go('cabinet'); };
   const sn=document.getElementById('saveName'); if(sn) sn.onclick=renameUser;
   const un=document.getElementById('uname');
   if(un) un.onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); renameUser(); } };
